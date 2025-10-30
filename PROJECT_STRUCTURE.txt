@@ -1,0 +1,247 @@
+Lego 時間規劃器 - iOS App 專案結構
+====================================
+
+專案概述
+--------
+一個使用 SwiftUI 開發的 iOS 時間規劃應用，採用 MVVM 架構模式。
+支援 iPhone 和 iPad，最低系統需求 iOS 15.0+。
+
+目錄結構
+--------
+blockstime/
+├── LegoTimePlanner/              # 主要應用代碼目錄
+│   ├── Models/                   # 資料模型層
+│   │   ├── Category.swift        # 時間類別模型
+│   │   └── LegoColor.swift       # 顏色系統和 Hex 轉換
+│   │
+│   ├── ViewModels/               # ViewModel 層 (業務邏輯)
+│   │   └── CategoryViewModel.swift  # 主要業務邏輯控制器
+│   │
+│   ├── Views/                    # 視圖層
+│   │   ├── ContentView.swift     # 主視圖 (包含佈局邏輯)
+│   │   ├── CategoryListView.swift   # 左側類別管理面板
+│   │   ├── BlocksGridView.swift     # Lego 積木網格顯示
+│   │   ├── StatsView.swift          # 統計面板
+│   │   └── Components/              # 可重用組件
+│   │       ├── CategoryRow.swift    # 單個類別項目
+│   │       └── LegoBlock.swift      # Lego 積木元件
+│   │
+│   ├── Utilities/                # 工具類
+│   │   ├── Constants.swift       # 全局常數定義
+│   │   └── LocalStorage.swift    # UserDefaults 儲存管理
+│   │
+│   ├── LegoTimePlannerApp.swift  # App 入口點 (@main)
+│   └── Info.plist                # App 配置文件
+│
+├── README.md                     # 專案說明文檔 (完整)
+├── SETUP_GUIDE.md                # Xcode 設置指南 (詳細)
+├── QUICK_START.md                # 快速開始指南 (5分鐘)
+└── PROJECT_STRUCTURE.txt         # 本文件
+
+文件說明
+--------
+
+📦 Models (資料層)
+------------------
+Category.swift (40 行)
+- 定義時間類別的資料結構
+- 包含 id, name, hours, colorId 屬性
+- 提供計算屬性: blocksCount, percentage
+- 實現 Identifiable, Codable 協議
+
+LegoColor.swift (70 行)
+- 定義 Lego 顏色系統
+- 8 種預設顏色配置
+- Hex 字串轉 SwiftUI Color 的擴展
+- 支援漸層和陰影效果
+
+🎮 ViewModels (業務邏輯層)
+---------------------------
+CategoryViewModel.swift (90 行)
+- ObservableObject，管理應用狀態
+- CRUD 操作: 新增/刪除/更新類別
+- 積木拖放邏輯
+- 統計計算: 總時數、剩餘時數
+- 資料持久化調用
+
+🎨 Views (視圖層)
+-----------------
+ContentView.swift (90 行)
+- 主視圖，組合所有子視圖
+- 響應式佈局 (GeometryReader)
+- 區分 iPhone/iPad 佈局
+- 深色主題配置
+
+CategoryListView.swift (110 行)
+- 左側類別管理面板
+- ScrollView + VStack 佈局
+- 顏色選擇器 Sheet
+- 新增類別按鈕
+
+BlocksGridView.swift (95 行)
+- Lego 積木網格顯示
+- LazyVGrid 佈局
+- 拖放功能實現 (onDrag/onDrop)
+- 動態計算積木大小
+
+StatsView.swift (65 行)
+- 橫向滾動統計面板
+- 顯示各類別時數
+- 顯示未分配時間
+- 漸層卡片設計
+
+Components/CategoryRow.swift (85 行)
+- 單個類別的編輯界面
+- 名稱輸入框
+- 時數輸入框 (支援小數)
+- 顏色選擇器觸發
+- 刪除按鈕
+
+Components/LegoBlock.swift (40 行)
+- Lego 積木視覺組件
+- 漸層填充 (light → main → dark)
+- 3D 效果 (陰影和邊框)
+- 積木編號顯示
+
+🛠 Utilities (工具層)
+---------------------
+Constants.swift (20 行)
+- 全局常數定義
+- 總時數: 168 小時 (一週)
+- 積木時數: 1 小時
+- UI 常數: 尺寸、間距
+
+LocalStorage.swift (45 行)
+- UserDefaults 封裝
+- JSON 編碼/解碼
+- 預設資料生成
+- 錯誤處理
+
+🚀 App 入口
+-----------
+LegoTimePlannerApp.swift (15 行)
+- @main 標記的 App 結構
+- WindowGroup 場景配置
+
+📋 配置文件
+-----------
+Info.plist
+- Bundle 識別符
+- 顯示名稱: "Lego時間規劃器"
+- 支援方向: Portrait, Landscape
+- 場景配置
+
+代碼統計
+--------
+總文件數: 15
+Swift 文件: 12
+代碼總行數: ~1,356 行
+
+分類統計:
+- Models: 110 行
+- ViewModels: 90 行
+- Views: 480 行
+- Components: 125 行
+- Utilities: 65 行
+- App 入口: 15 行
+- 文檔: 470+ 行
+
+架構模式
+--------
+MVVM (Model-View-ViewModel)
+
+數據流:
+View → ViewModel → Model
+     ← @Published ←
+
+特點:
+- 單向數據流
+- ObservableObject + @Published
+- 視圖自動更新
+- 易於測試
+
+技術棧
+------
+- 語言: Swift 5.5+
+- 框架: SwiftUI
+- 資料綁定: Combine
+- 儲存: UserDefaults
+- 拖放: SwiftUI Drag & Drop
+- 佈局: LazyVGrid, ScrollView
+- 最低版本: iOS 15.0
+
+核心功能
+--------
+✅ 時間類別管理 (CRUD)
+✅ Lego 積木視覺化
+✅ 拖放轉移時間
+✅ 即時統計顯示
+✅ 本地資料持久化
+✅ 顏色自定義
+✅ 響應式佈局
+✅ 深色主題
+
+未來擴展
+--------
+- iCloud 同步
+- 多週規劃
+- 統計圖表
+- 小工具 (Widget)
+- Apple Watch 支援
+- 分享功能
+- 主題切換
+
+建議開發流程
+-----------
+1. 在 Xcode 中創建新專案
+2. 複製所有 .swift 文件
+3. 整理文件到對應群組
+4. 運行並測試
+5. 根據需求自定義
+
+相依性
+------
+無外部相依套件，純 SwiftUI 實作
+
+測試建議
+--------
+- 單元測試: ViewModel 邏輯
+- UI 測試: 拖放功能
+- 整合測試: 資料持久化
+
+效能考量
+--------
+- LazyVGrid: 延遲載入積木
+- @Published: 僅更新變更部分
+- UserDefaults: 輕量級資料
+- 優化建議: 大量積木時考慮虛擬化
+
+安全性
+------
+- 本地儲存 (無網路請求)
+- 無敏感資料收集
+- 無第三方追蹤
+
+可訪問性
+--------
+- 支援動態字體
+- 顏色對比符合標準
+- 可考慮添加 VoiceOver 支援
+
+國際化
+------
+- 目前: 繁體中文
+- 可擴展: 支援多語言
+
+授權
+----
+個人學習專案
+
+作者
+----
+由 Claude AI 協助開發
+日期: 2025-10-30
+
+====================================
+版本: 1.0.0 (第一、二階段完成)
+====================================

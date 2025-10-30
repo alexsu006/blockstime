@@ -1,0 +1,160 @@
+# 🚀 快速開始 - 5 分鐘上手指南
+
+## 最快開始方式
+
+### 步驟 1: 開啟 Xcode (1 分鐘)
+```
+打開 Xcode → File → New → Project → iOS → App
+```
+
+配置:
+- Product Name: `LegoTimePlanner`
+- Interface: **SwiftUI** ⚠️
+- Language: Swift
+
+### 步驟 2: 複製文件 (2 分鐘)
+
+#### 方式 A: 直接拖拽 (推薦)
+1. 下載/克隆本專案
+2. 在 Finder 中打開 `LegoTimePlanner` 資料夾
+3. 全選所有 `.swift` 文件 (Cmd+A)
+4. 拖拽到 Xcode 專案中
+5. 勾選 "Copy items if needed"
+
+#### 方式 B: 手動複製
+```bash
+# 在終端執行
+cd /path/to/your/xcode/project
+cp -r /path/to/this/repo/LegoTimePlanner/* ./LegoTimePlanner/
+```
+
+### 步驟 3: 整理文件 (1 分鐘)
+
+在 Xcode 中創建資料夾結構 (右鍵 → New Group):
+```
+Models/
+  ├─ Category.swift
+  └─ LegoColor.swift
+ViewModels/
+  └─ CategoryViewModel.swift
+Views/
+  ├─ ContentView.swift
+  ├─ CategoryListView.swift
+  ├─ BlocksGridView.swift
+  ├─ StatsView.swift
+  └─ Components/
+      ├─ CategoryRow.swift
+      └─ LegoBlock.swift
+Utilities/
+  ├─ Constants.swift
+  └─ LocalStorage.swift
+```
+
+### 步驟 4: 運行! (1 分鐘)
+```
+選擇模擬器: iPhone 14 Pro
+點擊 ▶️ Run (或 Cmd+R)
+```
+
+---
+
+## 檢查清單
+
+運行前確認:
+- [ ] Interface 選擇了 **SwiftUI** (不是 Storyboard)
+- [ ] 所有 12 個 .swift 文件都已添加
+- [ ] 沒有紅色錯誤標記
+- [ ] 模擬器 iOS 版本 >= 15.0
+
+---
+
+## 常見問題 1 分鐘解決
+
+### ❌ 編譯錯誤
+**檢查**: 所有文件都添加了嗎？
+```bash
+# 應該有這些文件
+LegoTimePlannerApp.swift
+Category.swift
+LegoColor.swift
+CategoryViewModel.swift
+ContentView.swift
+... (共 12 個)
+```
+
+### ❌ 顏色不顯示
+**解決**: 確保 `LegoColor.swift` 包含 Color extension
+
+### ❌ 拖放無效
+**解決**: 使用 iOS 15+ 模擬器/真機
+
+---
+
+## 文件清單 (12 個必要文件)
+
+### 核心文件 (3)
+- ✅ `LegoTimePlannerApp.swift` - App 入口
+- ✅ `Category.swift` - 資料模型
+- ✅ `LegoColor.swift` - 顏色系統
+
+### ViewModel (1)
+- ✅ `CategoryViewModel.swift` - 業務邏輯
+
+### 主視圖 (4)
+- ✅ `ContentView.swift` - 主畫面
+- ✅ `CategoryListView.swift` - 左側面板
+- ✅ `BlocksGridView.swift` - 積木區
+- ✅ `StatsView.swift` - 統計面板
+
+### 組件 (2)
+- ✅ `CategoryRow.swift` - 類別項目
+- ✅ `LegoBlock.swift` - Lego 積木
+
+### 工具 (2)
+- ✅ `Constants.swift` - 常數
+- ✅ `LocalStorage.swift` - 儲存管理
+
+---
+
+## 測試功能
+
+運行後立即測試:
+1. ✅ 點擊 "+ 新增類別"
+2. ✅ 修改類別名稱
+3. ✅ 調整時數 (看到積木變化)
+4. ✅ 拖動積木到其他類別
+5. ✅ 查看底部統計
+
+---
+
+## 下一步
+
+### 自定義設置
+編輯 `Constants.swift`:
+```swift
+static let totalHours: Double = 168.0  // 總時數
+static let blockHours: Double = 1.0    // 每積木時數
+static let blockSize: CGFloat = 60     // 積木大小
+```
+
+### 添加新顏色
+編輯 `LegoColor.swift`:
+```swift
+LegoColor(id: "mycolor",
+          main: "#RRGGBB",
+          light: "#RRGGBB",
+          dark: "#RRGGBB",
+          glow: "#RRGGBB")
+```
+
+---
+
+## 需要詳細說明？
+
+- 📖 完整文檔: 查看 `README.md`
+- 🔧 設置指南: 查看 `SETUP_GUIDE.md`
+- 💡 功能說明: 查看各 `.swift` 文件的註解
+
+---
+
+**開始使用吧! 🧱**
