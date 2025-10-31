@@ -96,7 +96,11 @@ struct CategoryBlockGroup: View {
     private let columns = 4
     private var blockSize: CGFloat {
         // Calculate based on available width
+        #if os(macOS)
+        let screenWidth = NSScreen.main?.frame.width ?? 1024
+        #else
         let screenWidth = UIScreen.main.bounds.width
+        #endif
         let availableWidth = screenWidth - 340 // sidebar + padding
         let totalGap = CGFloat(columns - 1) * Constants.blockGap
         let containerPadding: CGFloat = 60
