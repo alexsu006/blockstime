@@ -11,8 +11,27 @@ import UniformTypeIdentifiers
 struct BlocksGridView: View {
     @ObservedObject var viewModel: CategoryViewModel
 
-    // 生成所有積木的陣列（不分類別，統一顯示）
+    // Cache for memoization
+    @State private var cachedBlocks: [(category: Category, blockIndex: Int)] = []
+    @State private var lastCategoryHash: Int = 0
+
+    // 生成所有積木的陣列（不分類別，統一顯示）- 使用記憶化優化性能
     private var allBlocks: [(category: Category, blockIndex: Int)] {
+        // Create a hash of current categories state to detect changes
+        let currentHash = viewModel.categories.map { "\($0.id):\($0.hours)" }.joined().hashValue
+
+        // Only recompute if categories changed
+        if currentHash != lastCategoryHash {
+            DispatchQueue.main.async {
+                self.lastCategoryHash = currentHash
+                self.cachedBlocks = computeBlocks()
+            }
+        }
+
+        return cachedBlocks.isEmpty ? computeBlocks() : cachedBlocks
+    }
+
+    private func computeBlocks() -> [(category: Category, blockIndex: Int)] {
         var blocks: [(Category, Int)] = []
         for category in viewModel.categories.filter({ $0.hours > 0 }) {
             for index in 0..<category.blocksCount {
@@ -26,7 +45,7 @@ struct BlocksGridView: View {
     private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, blockSize: CGFloat) {
         let totalBlocks = allBlocks.count
         guard totalBlocks > 0 else {
-            return (4, 60)
+            return (Constants.defaultLayoutColumns, Constants.blockSize)
         }
 
         let padding: CGFloat = 30
@@ -34,10 +53,10 @@ struct BlocksGridView: View {
         let availableHeight = height - padding
 
         // 嘗試不同的列數，找到最適合的佈局
-        var bestColumns = 4
-        var bestBlockSize: CGFloat = 60
+        var bestColumns = Constants.defaultLayoutColumns
+        var bestBlockSize: CGFloat = Constants.blockSize
 
-        for cols in stride(from: 10, through: 3, by: -1) {
+        for cols in stride(from: Constants.maxLayoutColumns, through: Constants.minLayoutColumns, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
 
             // 計算基於寬度的積木大小
@@ -49,8 +68,8 @@ struct BlocksGridView: View {
             // 使用較小的尺寸以確保兩個方向都能放得下
             let blockSize = min(widthBasedSize, heightBasedSize)
 
-            // 如果積木大小合理（至少20，最多80），就使用這個佈局
-            if blockSize >= 20 && blockSize <= 80 {
+            // 如果積木大小合理，就使用這個佈局
+            if blockSize >= Constants.minBlockSize && blockSize <= Constants.maxBlockSize {
                 bestColumns = cols
                 bestBlockSize = blockSize
                 break

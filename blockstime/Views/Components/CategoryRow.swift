@@ -145,7 +145,7 @@ struct CategoryRow: View {
         )
         .onChange(of: category.hours) { newValue in
             // Sync external changes to slider
-            if abs(sliderValue - newValue) > 0.01 {
+            if abs(sliderValue - newValue) > Constants.sliderSyncThreshold {
                 sliderValue = newValue
             }
         }

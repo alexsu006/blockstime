@@ -20,7 +20,9 @@ struct StatsView: View {
                         value: category.hours,
                         color: category.color.mainColor
                     )
-                    .id("\(category.id)-\(category.hours)")
+                    // Use stable ID for better animation performance
+                    .id(category.id)
+                    .transition(.opacity.combined(with: .scale))
                 }
 
                 // Remaining hours
@@ -30,12 +32,13 @@ struct StatsView: View {
                         value: viewModel.remainingHours(),
                         color: Color(hex: "#666666")
                     )
-                    .id("remaining-\(viewModel.remainingHours())")
+                    .id("remaining")
+                    .transition(.opacity.combined(with: .scale))
                 }
             }
             .padding(.horizontal, 15)
             .padding(.vertical, 20)
-            .animation(.easeInOut(duration: 0.3), value: viewModel.categories.map { $0.hours })
+            .animation(.easeInOut(duration: Constants.defaultAnimationDuration), value: viewModel.categories.map { $0.hours })
         }
         .background(Color.black.opacity(0.3))
         .cornerRadius(12)
