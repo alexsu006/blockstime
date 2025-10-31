@@ -15,7 +15,7 @@ struct CategoryRow: View {
     let onRemove: () -> Void
 
     @State private var hoursText: String = ""
-    @State private var isEditingHours = false
+    @FocusState private var isHoursFocused: Bool
 
     init(category: Category,
          onNameChange: @escaping (String) -> Void,
@@ -51,8 +51,11 @@ struct CategoryRow: View {
                         .overlay(
                             RoundedRectangle(cornerRadius: 6)
                                 .stroke(Color.gray, lineWidth: 2)
+                                .allowsHitTesting(false)
                         )
                 }
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Rectangle())
 
                 // Name input
                 TextField("類別名稱", text: .init(
@@ -72,27 +75,43 @@ struct CategoryRow: View {
                         .background(Color(hex: "#AA0000"))
                         .cornerRadius(4)
                 }
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Rectangle())
             }
 
             // Hours input
             HStack(spacing: 6) {
-                TextField("小時", text: $hoursText, onEditingChanged: { editing in
-                    isEditingHours = editing
-                }, onCommit: {
-                    if let newHours = Double(hoursText) {
-                        onHoursChange(newHours)
-                    } else {
-                        hoursText = String(format: "%.1f", category.hours)
+                TextField("小時", text: $hoursText)
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(height: 32)
+                    .focused($isHoursFocused)
+                    .onSubmit {
+                        if let newHours = Double(hoursText) {
+                            onHoursChange(newHours)
+                        } else {
+                            hoursText = String(format: "%.1f", category.hours)
+                        }
+                        isHoursFocused = false
                     }
-                })
-                .keyboardType(.decimalPad)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(height: 32)
-                .onChange(of: category.hours) { newValue in
-                    if !isEditingHours {
-                        hoursText = String(format: "%.1f", newValue)
+                    .onChange(of: category.hours) { newValue in
+                        if !isHoursFocused {
+                            hoursText = String(format: "%.1f", newValue)
+                        }
                     }
-                }
+                    .toolbar {
+                        ToolbarItemGroup(placement: .keyboard) {
+                            Spacer()
+                            Button("完成") {
+                                if let newHours = Double(hoursText) {
+                                    onHoursChange(newHours)
+                                } else {
+                                    hoursText = String(format: "%.1f", category.hours)
+                                }
+                                isHoursFocused = false
+                            }
+                        }
+                    }
 
                 Text("h (每 \(Int(Constants.blockHours))h)")
                     .font(.system(size: 12))
@@ -119,6 +138,7 @@ struct CategoryRow: View {
         .overlay(
             RoundedRectangle(cornerRadius: 10)
                 .stroke(Color(hex: "#333333"), lineWidth: 2)
+                .allowsHitTesting(false)
         )
     }
 }

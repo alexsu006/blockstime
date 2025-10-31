@@ -85,6 +85,7 @@ struct CategoryListView: View {
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(Color(hex: "#333333"), lineWidth: 2)
+                .allowsHitTesting(false)
         )
         .sheet(isPresented: $showColorPicker) {
             ColorPickerView(
@@ -134,6 +135,7 @@ struct ColorPickerView: View {
                                         color.id == selectedColor.id ? Color.white : Color.clear,
                                         lineWidth: 3
                                     )
+                                    .allowsHitTesting(false)
                             )
                             .shadow(
                                 color: color.id == selectedColor.id ? .white.opacity(0.5) : .clear,

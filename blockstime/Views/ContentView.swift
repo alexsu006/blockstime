@@ -104,6 +104,7 @@ struct ContentView: View {
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(Color(hex: "#333333"), lineWidth: 2)
+                .allowsHitTesting(false)
         )
     }
 }
