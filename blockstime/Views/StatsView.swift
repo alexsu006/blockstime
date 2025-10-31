@@ -77,7 +77,8 @@ struct StatItem: View {
             Rectangle()
                 .fill(color)
                 .frame(width: 4)
-                .cornerRadius(2),
+                .cornerRadius(2)
+                .allowsHitTesting(false),
             alignment: .leading
         )
     }

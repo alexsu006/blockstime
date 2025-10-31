@@ -80,6 +80,7 @@ struct CategoryBlockGroup: View {
                                 isDropTarget ? Color.white.opacity(0.3) : Color.clear,
                                 lineWidth: 2
                             )
+                            .allowsHitTesting(false)
                     )
             )
             .onDrop(of: [UTType.text], isTargeted: $isDropTarget) { providers in
