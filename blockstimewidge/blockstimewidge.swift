@@ -91,9 +91,14 @@ extension Color {
 class WidgetDataProvider {
     static let shared = WidgetDataProvider()
     private let storageKey = "legoTimePlannerCategories"
+    private let appGroupId = "group.alex.blockstime"
+
+    private var sharedDefaults: UserDefaults? {
+        UserDefaults(suiteName: appGroupId)
+    }
 
     func loadCategories() -> [WidgetCategory] {
-        guard let data = UserDefaults.standard.data(forKey: storageKey) else {
+        guard let data = sharedDefaults?.data(forKey: storageKey) else {
             return defaultCategories()
         }
 
@@ -580,14 +585,7 @@ struct blockstimewidge: Widget {
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            if #available(macOS 14.0, iOS 17.0, *) {
-                blockstimewidgeEntryView(entry: entry)
-                    .containerBackground(.fill.tertiary, for: .widget)
-            } else {
-                blockstimewidgeEntryView(entry: entry)
-                    .padding()
-                    .background()
-            }
+            blockstimewidgeEntryView(entry: entry)
         }
         .configurationDisplayName("Blocks Time")
         .description("以積木方塊視覺化您的週時間規劃")
