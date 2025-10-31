@@ -202,18 +202,57 @@ struct SmallWidgetView: View {
     private var allBlocks: [(category: WidgetCategory, blockIndex: Int)] {
         var blocks: [(WidgetCategory, Int)] = []
         for category in categories.filter({ $0.hours > 0 }) {
-            for index in 0..<min(category.blocksCount, 20) { // Limit for small widget
+            for index in 0..<category.blocksCount {
                 blocks.append((category, index))
             }
         }
         return blocks
     }
 
+    // Calculate optimal layout for small widget
+    private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, blockSize: CGFloat, spacing: CGFloat) {
+        let totalBlocks = allBlocks.count
+        guard totalBlocks > 0 else {
+            return (7, 10, 2)
+        }
+
+        let titleHeight: CGFloat = 28
+        let horizontalPadding: CGFloat = 16
+        let verticalPadding: CGFloat = 16
+        let availableWidth = width - horizontalPadding
+        let availableHeight = height - titleHeight - verticalPadding
+
+        var bestColumns = 7
+        var bestBlockSize: CGFloat = 10
+        var bestSpacing: CGFloat = 2
+
+        // Try different column counts
+        for cols in stride(from: 10, through: 5, by: -1) {
+            let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
+
+            let spacing: CGFloat = 2
+            let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
+            let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
+
+            let blockSize = min(widthBasedSize, heightBasedSize)
+
+            if blockSize >= 8 && blockSize <= 20 {
+                bestColumns = cols
+                bestBlockSize = blockSize
+                bestSpacing = spacing
+                break
+            }
+        }
+
+        return (bestColumns, bestBlockSize, bestSpacing)
+    }
+
     var body: some View {
         GeometryReader { geometry in
-            let blockSize: CGFloat = 12
-            let columns = 7
-            let spacing: CGFloat = 2
+            let layout = calculateLayout(width: geometry.size.width, height: geometry.size.height)
+            let columns = layout.columns
+            let blockSize = layout.blockSize
+            let spacing = layout.spacing
 
             VStack(spacing: 4) {
                 // Title
@@ -231,7 +270,7 @@ struct SmallWidgetView: View {
                     columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
                     spacing: spacing
                 ) {
-                    ForEach(Array(allBlocks.prefix(35).enumerated()), id: \.offset) { _, block in
+                    ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
                         WidgetLegoBlock(
                             number: nil,
                             color: block.category.color,
@@ -271,11 +310,50 @@ struct MediumWidgetView: View {
         return blocks
     }
 
+    // Calculate optimal layout for medium widget
+    private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, blockSize: CGFloat, spacing: CGFloat) {
+        let totalBlocks = allBlocks.count
+        guard totalBlocks > 0 else {
+            return (14, 16, 3)
+        }
+
+        let legendWidth: CGFloat = 80
+        let titleHeight: CGFloat = 30
+        let padding: CGFloat = 30
+        let availableWidth = width - legendWidth - padding
+        let availableHeight = height - titleHeight - padding
+
+        var bestColumns = 14
+        var bestBlockSize: CGFloat = 16
+        var bestSpacing: CGFloat = 3
+
+        // Try different column counts
+        for cols in stride(from: 20, through: 8, by: -1) {
+            let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
+
+            let spacing: CGFloat = 3
+            let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
+            let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
+
+            let blockSize = min(widthBasedSize, heightBasedSize)
+
+            if blockSize >= 12 && blockSize <= 24 {
+                bestColumns = cols
+                bestBlockSize = blockSize
+                bestSpacing = spacing
+                break
+            }
+        }
+
+        return (bestColumns, bestBlockSize, bestSpacing)
+    }
+
     var body: some View {
         GeometryReader { geometry in
-            let blockSize: CGFloat = 18
-            let columns = 14
-            let spacing: CGFloat = 3
+            let layout = calculateLayout(width: geometry.size.width, height: geometry.size.height)
+            let columns = layout.columns
+            let blockSize = layout.blockSize
+            let spacing = layout.spacing
 
             HStack(spacing: 12) {
                 // Blocks Grid
@@ -296,7 +374,7 @@ struct MediumWidgetView: View {
                                 number: block.blockIndex + 1,
                                 color: block.category.color,
                                 size: blockSize,
-                                showNumber: blockSize >= 16
+                                showNumber: blockSize >= 14
                             )
                         }
                     }
@@ -357,11 +435,51 @@ struct LargeWidgetView: View {
         return blocks
     }
 
+    // Calculate optimal layout for large widget
+    private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, blockSize: CGFloat, spacing: CGFloat) {
+        let totalBlocks = allBlocks.count
+        guard totalBlocks > 0 else {
+            return (12, 20, 4)
+        }
+
+        let headerHeight: CGFloat = 50
+        let legendHeight: CGFloat = 50
+        let horizontalPadding: CGFloat = 24
+        let verticalPadding: CGFloat = 24
+        let availableWidth = width - horizontalPadding
+        let availableHeight = height - headerHeight - legendHeight - verticalPadding
+
+        var bestColumns = 12
+        var bestBlockSize: CGFloat = 20
+        var bestSpacing: CGFloat = 4
+
+        // Try different column counts
+        for cols in stride(from: 20, through: 8, by: -1) {
+            let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
+
+            let spacing: CGFloat = 4
+            let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
+            let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
+
+            let blockSize = min(widthBasedSize, heightBasedSize)
+
+            if blockSize >= 16 && blockSize <= 30 {
+                bestColumns = cols
+                bestBlockSize = blockSize
+                bestSpacing = spacing
+                break
+            }
+        }
+
+        return (bestColumns, bestBlockSize, bestSpacing)
+    }
+
     var body: some View {
         GeometryReader { geometry in
-            let blockSize: CGFloat = 24
-            let columns = 12
-            let spacing: CGFloat = 4
+            let layout = calculateLayout(width: geometry.size.width, height: geometry.size.height)
+            let columns = layout.columns
+            let blockSize = layout.blockSize
+            let spacing = layout.spacing
 
             VStack(spacing: 8) {
                 // Header
@@ -392,7 +510,7 @@ struct LargeWidgetView: View {
                             number: block.blockIndex + 1,
                             color: block.category.color,
                             size: blockSize,
-                            showNumber: true
+                            showNumber: blockSize >= 18
                         )
                     }
                 }
