@@ -13,13 +13,19 @@ import WidgetKit
 class LocalStorage {
     static let shared = LocalStorage()
 
+    private var sharedDefaults: UserDefaults? {
+        UserDefaults(suiteName: Constants.appGroupId)
+    }
+
     private init() {}
 
     func saveCategories(_ categories: [Category]) {
         do {
             let encoder = JSONEncoder()
             let data = try encoder.encode(categories)
-            UserDefaults.standard.set(data, forKey: Constants.storageKey)
+
+            // Save to shared UserDefaults for widget access
+            sharedDefaults?.set(data, forKey: Constants.storageKey)
 
             // Refresh widgets after saving data
             #if canImport(WidgetKit)
@@ -33,7 +39,7 @@ class LocalStorage {
     }
 
     func loadCategories() -> [Category] {
-        guard let data = UserDefaults.standard.data(forKey: Constants.storageKey) else {
+        guard let data = sharedDefaults?.data(forKey: Constants.storageKey) else {
             return defaultCategories()
         }
 
