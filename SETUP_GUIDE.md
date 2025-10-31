@@ -1,6 +1,18 @@
 # Lego 時間規劃器 - Xcode 專案設置指南
 
-## 方法一：使用 Xcode 手動創建專案 (推薦)
+## 方法一：直接使用包含的 Xcode 專案 (最簡單，推薦)
+
+本專案已包含完整的 Xcode 專案文件 (`LegoTimePlanner.xcodeproj`)，可以直接開啟使用:
+
+1. 克隆或下載專案
+2. 雙擊 `LegoTimePlanner.xcodeproj` 開啟專案
+3. 選擇目標裝置並點擊 ▶️ Run
+
+這個方法可以避免常見的建置錯誤，如 "Multiple commands produce" 錯誤。
+
+---
+
+## 方法二：使用 Xcode 手動創建專案 (進階)
 
 ### 步驟 1: 創建新專案
 
@@ -130,13 +142,25 @@ echo "請使用方法一手動創建，更簡單可靠"
 - 確保運行在 iOS 15+ 的裝置/模擬器上
 - 檢查 `BlocksGridView.swift` 中的 `onDrag` 和 `onDrop` 實作
 
-### Q4: 資料無法儲存
+### Q4: "Multiple commands produce '/Users/.../DerivedData/...'" 錯誤
+**問題**: 這是 Xcode 最常見的建置錯誤之一，通常發生在 Info.plist 被錯誤地添加到 "Copy Bundle Resources" 階段。
+
+**解決方案**:
+- **最佳方案**: 使用本專案包含的 `LegoTimePlanner.xcodeproj` 文件，已正確配置
+- **手動修復**:
+  1. 在 Xcode 中選擇專案 → Target → Build Phases
+  2. 展開 "Copy Bundle Resources"
+  3. 找到 Info.plist 並移除它
+  4. 清理建置資料夾 (Product → Clean Build Folder)
+  5. 重新建置
+
+### Q5: 資料無法儲存
 **解決方案**:
 - 檢查 `LocalStorage.swift` 實作
 - 查看 Console 中的錯誤訊息
 - 確保 `Constants.storageKey` 正確設定
 
-### Q5: iPad 上顯示異常
+### Q6: iPad 上顯示異常
 **解決方案**:
 - 檢查 `ContentView.swift` 中的 GeometryReader 佈局邏輯
 - 確認 `Constants.sidebarWidth` 設定合理
