@@ -9,12 +9,27 @@ import Foundation
 import Combine
 
 class CategoryViewModel: ObservableObject {
-    @Published var categories: [Category] = []
+    @Published var categories: [Category] = [] {
+        didSet {
+            updateCachedValues()
+        }
+    }
+
+    // Cached computed values for better performance
+    @Published private(set) var cachedTotalUsedHours: Double = 0
+    @Published private(set) var cachedRemainingHours: Double = 0
 
     private let storage = LocalStorage.shared
 
     init() {
         loadCategories()
+    }
+
+    // MARK: - Private Helpers
+
+    private func updateCachedValues() {
+        cachedTotalUsedHours = categories.reduce(0) { $0 + $1.hours }
+        cachedRemainingHours = Constants.totalHours - cachedTotalUsedHours
     }
 
     // MARK: - Data Management
@@ -53,12 +68,15 @@ class CategoryViewModel: ObservableObject {
 
     func updateCategoryHours(_ category: Category, newHours: Double) {
         if let index = categories.firstIndex(where: { $0.id == category.id }) {
-            let totalUsed = totalUsedHours()
+            let totalUsed = cachedTotalUsedHours
             let maxAvailable = Constants.totalHours - totalUsed + categories[index].hours
             let clampedHours = min(max(0, newHours), maxAvailable)
 
+            // Round to avoid floating point precision errors
+            let roundedHours = round(clampedHours * Constants.hoursPrecision) / Constants.hoursPrecision
+
             // Directly modify the hours property to ensure @Published triggers
-            categories[index].hours = clampedHours
+            categories[index].hours = roundedHours
             saveCategories()
         }
     }
@@ -80,9 +98,9 @@ class CategoryViewModel: ObservableObject {
             categories[fromIndex].hours -= Constants.blockHours
             categories[toIndex].hours += Constants.blockHours
 
-            // Round to avoid floating point errors
-            categories[fromIndex].hours = round(categories[fromIndex].hours * 10) / 10
-            categories[toIndex].hours = round(categories[toIndex].hours * 10) / 10
+            // Round to avoid floating point errors using centralized precision constant
+            categories[fromIndex].hours = round(categories[fromIndex].hours * Constants.hoursPrecision) / Constants.hoursPrecision
+            categories[toIndex].hours = round(categories[toIndex].hours * Constants.hoursPrecision) / Constants.hoursPrecision
 
             saveCategories()
         }
@@ -91,11 +109,11 @@ class CategoryViewModel: ObservableObject {
     // MARK: - Statistics
 
     func totalUsedHours() -> Double {
-        categories.reduce(0) { $0 + $1.hours }
+        return cachedTotalUsedHours
     }
 
     func remainingHours() -> Double {
-        Constants.totalHours - totalUsedHours()
+        return cachedRemainingHours
     }
 
     func visibleCategories() -> [Category] {
@@ -104,9 +122,7 @@ class CategoryViewModel: ObservableObject {
 
     // 計算某個類別可用的最大時數（168小時 - 其他類別總時數）
     func maxAvailableHours(for category: Category) -> Double {
-        let otherCategoriesTotal = categories
-            .filter { $0.id != category.id }
-            .reduce(0) { $0 + $1.hours }
+        let otherCategoriesTotal = cachedTotalUsedHours - (categories.first(where: { $0.id == category.id })?.hours ?? 0)
         return Constants.totalHours - otherCategoriesTotal
     }
 }
