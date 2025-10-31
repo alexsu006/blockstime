@@ -10,19 +10,35 @@ import UniformTypeIdentifiers
 
 struct BlocksGridView: View {
     @ObservedObject var viewModel: CategoryViewModel
-    @State private var draggedBlock: DraggedBlock?
+
+    private let columns = 4
+    private var blockSize: CGFloat {
+        let screenWidth = UIScreen.main.bounds.width
+        let availableWidth = screenWidth - 340 // sidebar + padding
+        let totalGap = CGFloat(columns - 1) * Constants.blockGap
+        let containerPadding: CGFloat = 60
+        return min(60, (availableWidth - totalGap - containerPadding) / CGFloat(columns))
+    }
+
+    // 生成所有積木的陣列（不分類別，統一顯示）
+    private var allBlocks: [(category: Category, blockIndex: Int)] {
+        var blocks: [(Category, Int)] = []
+        for category in viewModel.categories.filter({ $0.hours > 0 }) {
+            for index in 0..<category.blocksCount {
+                blocks.append((category, index))
+            }
+        }
+        return blocks
+    }
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 15) {
-                ForEach(viewModel.categories.filter { $0.hours > 0 }) { category in
-                    CategoryBlockGroup(
-                        category: category,
-                        draggedBlock: $draggedBlock,
-                        onBlockMoved: { fromCat, toCat in
-                            viewModel.moveBlock(from: fromCat, to: toCat)
-                        }
-                    )
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.fixed(blockSize), spacing: Constants.blockGap), count: columns),
+                spacing: Constants.blockGap
+            ) {
+                ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
+                    LegoBlock(number: block.blockIndex + 1, color: block.category.color, size: blockSize)
                 }
             }
             .padding(15)

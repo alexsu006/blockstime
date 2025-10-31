@@ -99,4 +99,12 @@ class CategoryViewModel: ObservableObject {
     func visibleCategories() -> [Category] {
         categories.filter { $0.hours > 0 }
     }
+
+    // 計算某個類別可用的最大時數（168小時 - 其他類別總時數）
+    func maxAvailableHours(for category: Category) -> Double {
+        let otherCategoriesTotal = categories
+            .filter { $0.id != category.id }
+            .reduce(0) { $0 + $1.hours }
+        return Constants.totalHours - otherCategoriesTotal
+    }
 }

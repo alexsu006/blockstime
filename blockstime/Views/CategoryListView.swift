@@ -31,6 +31,7 @@ struct CategoryListView: View {
                     ForEach(viewModel.categories) { category in
                         CategoryRow(
                             category: category,
+                            maxAvailableHours: viewModel.maxAvailableHours(for: category),
                             onNameChange: { newName in
                                 viewModel.updateCategoryName(category, newName: newName)
                             },
