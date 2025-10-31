@@ -56,6 +56,7 @@ struct CategoryListView: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity)
+                    .frame(minHeight: 44)
                     .padding(.vertical, 12)
                     .background(
                         LinearGradient(
@@ -69,6 +70,7 @@ struct CategoryListView: View {
                     )
                     .cornerRadius(8)
             }
+            .buttonStyle(PlainButtonStyle())
         }
         .padding(20)
         .background(
@@ -112,36 +114,40 @@ struct ColorPickerView: View {
                 .font(.headline)
                 .padding(.top)
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 50))], spacing: 15) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 15) {
                 ForEach(LegoColor.allColors) { color in
                     Button(action: {
                         onColorSelected(color)
                     }) {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        color.lightColor,
-                                        color.mainColor
-                                    ]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 50, height: 50)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(
-                                        color.id == selectedColor.id ? Color.white : Color.clear,
-                                        lineWidth: 3
+                        ZStack {
+                            Color.clear
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            color.lightColor,
+                                            color.mainColor
+                                        ]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
                                     )
-                                    .allowsHitTesting(false)
-                            )
-                            .shadow(
-                                color: color.id == selectedColor.id ? .white.opacity(0.5) : .clear,
-                                radius: 5
-                            )
+                                )
+                                .frame(width: 50, height: 50)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(
+                                            color.id == selectedColor.id ? Color.white : Color.clear,
+                                            lineWidth: 3
+                                        )
+                                )
+                                .shadow(
+                                    color: color.id == selectedColor.id ? .white.opacity(0.5) : .clear,
+                                    radius: 5
+                                )
+                        }
+                        .frame(width: 60, height: 60)
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
             .padding(.horizontal)

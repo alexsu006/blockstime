@@ -36,26 +36,28 @@ struct CategoryRow: View {
             HStack(spacing: 8) {
                 // Color button
                 Button(action: onColorTap) {
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    category.color.lightColor,
-                                    category.color.mainColor
-                                ]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+                    ZStack {
+                        Color.clear
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        category.color.lightColor,
+                                        category.color.mainColor
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
                             )
-                        )
-                        .frame(width: 24, height: 24)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color.gray, lineWidth: 2)
-                                .allowsHitTesting(false)
-                        )
+                            .frame(width: 24, height: 24)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray, lineWidth: 2)
+                            )
+                    }
+                    .frame(width: 44, height: 44)
                 }
-                .frame(minWidth: 44, minHeight: 44)
-                .contentShape(Rectangle())
+                .buttonStyle(PlainButtonStyle())
 
                 // Name input
                 TextField("類別名稱", text: .init(
@@ -68,15 +70,18 @@ struct CategoryRow: View {
 
                 // Remove button
                 Button(action: onRemove) {
-                    Text("×")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(width: 24, height: 24)
-                        .background(Color(hex: "#AA0000"))
-                        .cornerRadius(4)
+                    ZStack {
+                        Color.clear
+                        Text("×")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 24, height: 24)
+                            .background(Color(hex: "#AA0000"))
+                            .cornerRadius(4)
+                    }
+                    .frame(width: 44, height: 44)
                 }
-                .frame(minWidth: 44, minHeight: 44)
-                .contentShape(Rectangle())
+                .buttonStyle(PlainButtonStyle())
             }
 
             // Hours input
