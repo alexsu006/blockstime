@@ -83,12 +83,14 @@ struct ContentView: View {
     }
 
     private var rightPanel: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 15) {
             // Blocks grid
             BlocksGridView(viewModel: viewModel)
+                .frame(maxHeight: .infinity)
 
-            // Stats panel
+            // Stats panel - fixed height at bottom
             StatsView(viewModel: viewModel)
+                .frame(height: 100)
         }
         .background(
             LinearGradient(

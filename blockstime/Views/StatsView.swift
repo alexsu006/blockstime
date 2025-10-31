@@ -20,6 +20,7 @@ struct StatsView: View {
                         value: category.hours,
                         color: category.color.mainColor
                     )
+                    .id("\(category.id)-\(category.hours)")
                 }
 
                 // Remaining hours
@@ -29,10 +30,12 @@ struct StatsView: View {
                         value: viewModel.remainingHours(),
                         color: Color(hex: "#666666")
                     )
+                    .id("remaining-\(viewModel.remainingHours())")
                 }
             }
             .padding(.horizontal, 15)
             .padding(.vertical, 20)
+            .animation(.easeInOut(duration: 0.3), value: viewModel.categories.map { $0.hours })
         }
         .background(Color.black.opacity(0.3))
         .cornerRadius(12)
