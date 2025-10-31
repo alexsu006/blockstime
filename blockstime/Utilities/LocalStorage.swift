@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 class LocalStorage {
     static let shared = LocalStorage()
@@ -17,6 +20,13 @@ class LocalStorage {
             let encoder = JSONEncoder()
             let data = try encoder.encode(categories)
             UserDefaults.standard.set(data, forKey: Constants.storageKey)
+
+            // Refresh widgets after saving data
+            #if canImport(WidgetKit)
+            if #available(iOS 14.0, macOS 11.0, *) {
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+            #endif
         } catch {
             print("Failed to save categories: \(error)")
         }
