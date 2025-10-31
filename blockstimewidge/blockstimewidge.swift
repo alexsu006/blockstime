@@ -439,7 +439,7 @@ struct LargeWidgetView: View {
     private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
         let totalBlocks = allBlocks.count
         guard totalBlocks > 0 else {
-            return (14, 12, 18, 3.5)
+            return (14, 12, 20, 3.5)
         }
 
         // Optimized spacing to maximize block display area
@@ -452,7 +452,7 @@ struct LargeWidgetView: View {
 
         var bestColumns = 14
         var bestRows = 12
-        var bestBlockSize: CGFloat = 16  // Increased from 14
+        var bestBlockSize: CGFloat = 20  // Default target block size
         var bestSpacing: CGFloat = 3.5  // Increased from 2.5
 
         // Try different column counts to find optimal layout
