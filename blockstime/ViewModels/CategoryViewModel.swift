@@ -54,9 +54,11 @@ class CategoryViewModel: ObservableObject {
     func updateCategoryHours(_ category: Category, newHours: Double) {
         if let index = categories.firstIndex(where: { $0.id == category.id }) {
             let totalUsed = totalUsedHours()
-            categories[index].updateHours(newHours, totalUsed: totalUsed)
-            // Explicitly trigger objectWillChange to ensure UI updates
-            objectWillChange.send()
+            let maxAvailable = Constants.totalHours - totalUsed + categories[index].hours
+            let clampedHours = min(max(0, newHours), maxAvailable)
+
+            // Directly modify the hours property to ensure @Published triggers
+            categories[index].hours = clampedHours
             saveCategories()
         }
     }
