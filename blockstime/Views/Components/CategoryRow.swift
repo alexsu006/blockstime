@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CategoryRow: View {
     let category: Category
+    let maxAvailableHours: Double
     let onNameChange: (String) -> Void
     let onHoursChange: (Double) -> Void
     let onColorTap: () -> Void
@@ -17,11 +18,13 @@ struct CategoryRow: View {
     @State private var sliderValue: Double
 
     init(category: Category,
+         maxAvailableHours: Double,
          onNameChange: @escaping (String) -> Void,
          onHoursChange: @escaping (Double) -> Void,
          onColorTap: @escaping () -> Void,
          onRemove: @escaping () -> Void) {
         self.category = category
+        self.maxAvailableHours = maxAvailableHours
         self.onNameChange = onNameChange
         self.onHoursChange = onHoursChange
         self.onColorTap = onColorTap
@@ -105,13 +108,13 @@ struct CategoryRow: View {
                         .foregroundColor(.gray)
                         .frame(width: 20)
 
-                    Slider(value: $sliderValue, in: 0...Constants.totalHours, step: 0.5)
+                    Slider(value: $sliderValue, in: 0...maxAvailableHours, step: 0.5)
                         .accentColor(category.color.mainColor)
                         .onChange(of: sliderValue) { newValue in
                             onHoursChange(newValue)
                         }
 
-                    Text("\(Int(Constants.totalHours))")
+                    Text(String(format: "%.0f", maxAvailableHours))
                         .font(.system(size: 10))
                         .foregroundColor(.gray)
                         .frame(width: 30)
