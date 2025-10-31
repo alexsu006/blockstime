@@ -64,7 +64,9 @@ struct ContentView: View {
                                 .padding(.bottom, 20)
                                 .tag(1)
                         }
+                        #if os(iOS)
                         .tabViewStyle(.page(indexDisplayMode: .never))
+                        #endif
                     }
                 }
             }
