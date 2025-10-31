@@ -265,24 +265,24 @@ struct SmallWidgetView: View {
                 .padding(.horizontal, 8)
                 .padding(.top, 8)
 
-                // Blocks Grid
-                LazyVGrid(
-                    columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
-                    spacing: spacing
-                ) {
-                    ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
-                        WidgetLegoBlock(
-                            number: nil,
-                            color: block.category.color,
-                            size: blockSize,
-                            showNumber: false
-                        )
+                // Scrollable Blocks Grid
+                ScrollView(.vertical, showsIndicators: true) {
+                    LazyVGrid(
+                        columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
+                        spacing: spacing
+                    ) {
+                        ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
+                            WidgetLegoBlock(
+                                number: nil,
+                                color: block.category.color,
+                                size: blockSize,
+                                showNumber: false
+                            )
+                        }
                     }
+                    .padding(.horizontal, 8)
+                    .padding(.bottom, 8)
                 }
-                .padding(.horizontal, 8)
-                .padding(.bottom, 8)
-
-                Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(
@@ -365,17 +365,19 @@ struct MediumWidgetView: View {
                         Spacer()
                     }
 
-                    LazyVGrid(
-                        columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
-                        spacing: spacing
-                    ) {
-                        ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
-                            WidgetLegoBlock(
-                                number: block.blockIndex + 1,
-                                color: block.category.color,
-                                size: blockSize,
-                                showNumber: blockSize >= 14
-                            )
+                    ScrollView(.vertical, showsIndicators: true) {
+                        LazyVGrid(
+                            columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
+                            spacing: spacing
+                        ) {
+                            ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
+                                WidgetLegoBlock(
+                                    number: block.blockIndex + 1,
+                                    color: block.category.color,
+                                    size: blockSize,
+                                    showNumber: blockSize >= 14
+                                )
+                            }
                         }
                     }
                 }
@@ -500,21 +502,23 @@ struct LargeWidgetView: View {
                 .padding(.horizontal, 12)
                 .padding(.top, 12)
 
-                // Blocks Grid
-                LazyVGrid(
-                    columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
-                    spacing: spacing
-                ) {
-                    ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
-                        WidgetLegoBlock(
-                            number: block.blockIndex + 1,
-                            color: block.category.color,
-                            size: blockSize,
-                            showNumber: blockSize >= 18
-                        )
+                // Scrollable Blocks Grid
+                ScrollView(.vertical, showsIndicators: true) {
+                    LazyVGrid(
+                        columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
+                        spacing: spacing
+                    ) {
+                        ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
+                            WidgetLegoBlock(
+                                number: block.blockIndex + 1,
+                                color: block.category.color,
+                                size: blockSize,
+                                showNumber: blockSize >= 18
+                            )
+                        }
                     }
+                    .padding(.horizontal, 12)
                 }
-                .padding(.horizontal, 12)
 
                 // Categories Legend
                 HStack(spacing: 12) {
