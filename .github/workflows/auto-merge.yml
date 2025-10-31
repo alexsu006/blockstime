@@ -1,46 +1,38 @@
-name: Auto Merge PR
+name: Auto Merge Claude Code PR
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches:
-      - main  # 主分支名称
 
 jobs:
-  auto-merge:
+  auto-approve-and-merge:
     runs-on: ubuntu-latest
 
-    # 只在 PR 由 Claude Code 创建时运行（检查分支名称以 claude/ 开头）
-    if: startsWith(github.event.pull_request.head.ref, 'claude/')
+    # 只处理 Claude Code 创建的 PR（分支名以 claude/ 开头）
+    if: startsWith(github.event.pull_request.head.ref, 'claude/') && github.event.pull_request.user.login == 'alexsu006'
+
+    permissions:
+      pull-requests: write
+      contents: write
 
     steps:
-      # 检查 PR 是否由授权用户创建
-      - name: Check PR author
-        if: github.event.pull_request.user.login == 'alexsu006'
-        run: echo "PR created by authorized user"
+      - name: Check out code
+        uses: actions/checkout@v4
 
-      # 自动核准 PR
-      - name: Approve PR
-        uses: hmarr/auto-approve-action@v3
+      # 自动批准 PR
+      - name: Approve Pull Request
+        uses: hmarr/auto-approve-action@v4
         with:
-          github-token: ${{ secrets.PAT_TOKEN }}
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
-      # 等待所有检查通过（可选）
-      - name: Wait for checks
-        uses: lewagon/wait-on-check-action@v1.3.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-        continue-on-error: true  # 如果没有其他检查，继续执行
-
-      # 自动 merge
-      - name: Auto merge
-        uses: pascalgn/automerge-action@v0.15.6
+      # 启用 GitHub 原生的 auto-merge 功能
+      - name: Enable auto-merge
+        run: |
+          gh pr merge ${{ github.event.pull_request.number }} --auto --squash
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-          MERGE_LABELS: ""  # 不需要特定 label
-          MERGE_METHOD: "squash"  # 可选: merge, squash, rebase
-          MERGE_COMMIT_MESSAGE: "pull-request-title"
-          MERGE_RETRIES: 6
-          MERGE_RETRY_SLEEP: 10000
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Success message
+        run: |
+          echo "✅ PR #${{ github.event.pull_request.number }} 已自动批准并启用 auto-merge"
+          echo "当所有检查通过后，PR 将自动合并"
