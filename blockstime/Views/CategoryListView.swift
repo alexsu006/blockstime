@@ -11,6 +11,7 @@ struct CategoryListView: View {
     @ObservedObject var viewModel: CategoryViewModel
     @State private var selectedCategoryForColor: Category?
     @State private var showColorPicker = false
+    @FocusState private var focusedField: Bool
 
     var body: some View {
         VStack(spacing: 15) {
@@ -100,6 +101,15 @@ struct CategoryListView: View {
                 }
             )
             .presentationDetents([.height(200)])
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("完成") {
+                    focusedField = false
+                }
+                .font(.system(size: 16, weight: .semibold))
+            }
         }
     }
 }

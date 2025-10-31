@@ -84,12 +84,30 @@ struct CategoryRow: View {
                 .buttonStyle(PlainButtonStyle())
             }
 
-            // Hours input
+            // Hours input with quick adjustment buttons
             HStack(spacing: 6) {
-                TextField("小時", text: $hoursText)
+                // Decrease button
+                Button(action: {
+                    let newHours = max(0, category.hours - 1)
+                    onHoursChange(newHours)
+                    hoursText = String(format: "%.1f", newHours)
+                }) {
+                    ZStack {
+                        Color.clear
+                        Image(systemName: "minus.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundColor(Color(hex: "#FF6B6B"))
+                    }
+                    .frame(width: 44, height: 44)
+                }
+                .buttonStyle(PlainButtonStyle())
+
+                // Hours text field
+                TextField("0.0", text: $hoursText)
                     .keyboardType(.decimalPad)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .frame(height: 32)
+                    .multilineTextAlignment(.center)
                     .focused($isHoursFocused)
                     .onSubmit {
                         if let newHours = Double(hoursText) {
@@ -104,23 +122,27 @@ struct CategoryRow: View {
                             hoursText = String(format: "%.1f", newValue)
                         }
                     }
-                    .toolbar {
-                        ToolbarItemGroup(placement: .keyboard) {
-                            Spacer()
-                            Button("完成") {
-                                if let newHours = Double(hoursText) {
-                                    onHoursChange(newHours)
-                                } else {
-                                    hoursText = String(format: "%.1f", category.hours)
-                                }
-                                isHoursFocused = false
-                            }
-                        }
-                    }
 
-                Text("h (每 \(Int(Constants.blockHours))h)")
-                    .font(.system(size: 12))
+                Text("h")
+                    .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.gray)
+                    .frame(width: 20)
+
+                // Increase button
+                Button(action: {
+                    let newHours = min(Constants.totalHours, category.hours + 1)
+                    onHoursChange(newHours)
+                    hoursText = String(format: "%.1f", newHours)
+                }) {
+                    ZStack {
+                        Color.clear
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundColor(Color(hex: "#00D9A3"))
+                    }
+                    .frame(width: 44, height: 44)
+                }
+                .buttonStyle(PlainButtonStyle())
             }
 
             // Stats
