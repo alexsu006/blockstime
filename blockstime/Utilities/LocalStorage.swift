@@ -27,10 +27,16 @@ class LocalStorage {
             // Save to shared UserDefaults for widget access
             sharedDefaults?.set(data, forKey: Constants.storageKey)
 
-            // Refresh widgets after saving data
+            // Force synchronize to ensure data is written immediately
+            sharedDefaults?.synchronize()
+
+            // Refresh widgets after saving data - ensure it runs on main thread
             #if canImport(WidgetKit)
             if #available(iOS 14.0, macOS 11.0, *) {
-                WidgetCenter.shared.reloadAllTimelines()
+                DispatchQueue.main.async {
+                    WidgetCenter.shared.reloadAllTimelines()
+                    print("Widget timelines reloaded")
+                }
             }
             #endif
         } catch {
