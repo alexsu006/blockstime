@@ -55,6 +55,8 @@ class CategoryViewModel: ObservableObject {
         if let index = categories.firstIndex(where: { $0.id == category.id }) {
             let totalUsed = totalUsedHours()
             categories[index].updateHours(newHours, totalUsed: totalUsed)
+            // Explicitly trigger objectWillChange to ensure UI updates
+            objectWillChange.send()
             saveCategories()
         }
     }
