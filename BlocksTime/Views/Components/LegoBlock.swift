@@ -1,6 +1,6 @@
 //
 //  LegoBlock.swift
-//  LegoTimePlanner
+//  BlocksTime
 //
 //  Created by Claude on 2025-10-30.
 //

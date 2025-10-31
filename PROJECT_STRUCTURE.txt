@@ -1,4 +1,4 @@
-Lego 時間規劃器 - iOS App 專案結構
+BlocksTime - iOS App 專案結構
 ====================================
 
 專案概述
@@ -9,7 +9,7 @@ Lego 時間規劃器 - iOS App 專案結構
 目錄結構
 --------
 blockstime/
-├── LegoTimePlanner/              # 主要應用代碼目錄
+├── BlocksTime/                   # 主要應用代碼目錄
 │   ├── Models/                   # 資料模型層
 │   │   ├── Category.swift        # 時間類別模型
 │   │   └── LegoColor.swift       # 顏色系統和 Hex 轉換
@@ -24,13 +24,13 @@ blockstime/
 │   │   ├── StatsView.swift          # 統計面板
 │   │   └── Components/              # 可重用組件
 │   │       ├── CategoryRow.swift    # 單個類別項目
-│   │       └── LegoBlock.swift      # Lego 積木元件
+│   │       └── LegoBlock.swift      # 積木元件
 │   │
 │   ├── Utilities/                # 工具類
 │   │   ├── Constants.swift       # 全局常數定義
 │   │   └── LocalStorage.swift    # UserDefaults 儲存管理
 │   │
-│   ├── LegoTimePlannerApp.swift  # App 入口點 (@main)
+│   ├── BlocksTimeApp.swift       # App 入口點 (@main)
 │   └── Info.plist                # App 配置文件
 │
 ├── README.md                     # 專案說明文檔 (完整)
@@ -50,7 +50,7 @@ Category.swift (40 行)
 - 實現 Identifiable, Codable 協議
 
 LegoColor.swift (70 行)
-- 定義 Lego 顏色系統
+- 定義顏色系統
 - 8 種預設顏色配置
 - Hex 字串轉 SwiftUI Color 的擴展
 - 支援漸層和陰影效果
@@ -98,7 +98,7 @@ Components/CategoryRow.swift (85 行)
 - 刪除按鈕
 
 Components/LegoBlock.swift (40 行)
-- Lego 積木視覺組件
+- 積木視覺組件
 - 漸層填充 (light → main → dark)
 - 3D 效果 (陰影和邊框)
 - 積木編號顯示
@@ -119,7 +119,7 @@ LocalStorage.swift (45 行)
 
 🚀 App 入口
 -----------
-LegoTimePlannerApp.swift (15 行)
+BlocksTimeApp.swift (15 行)
 - @main 標記的 App 結構
 - WindowGroup 場景配置
 
@@ -127,7 +127,7 @@ LegoTimePlannerApp.swift (15 行)
 -----------
 Info.plist
 - Bundle 識別符
-- 顯示名稱: "Lego時間規劃器"
+- 顯示名稱: "BlocksTime"
 - 支援方向: Portrait, Landscape
 - 場景配置
 
@@ -173,7 +173,7 @@ View → ViewModel → Model
 核心功能
 --------
 ✅ 時間類別管理 (CRUD)
-✅ Lego 積木視覺化
+✅ 積木視覺化
 ✅ 拖放轉移時間
 ✅ 即時統計顯示
 ✅ 本地資料持久化

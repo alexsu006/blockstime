@@ -1,6 +1,6 @@
-# 🧱 Lego 時間規劃器 - iOS App
+# 🧱 BlocksTime - iOS App
 
-一個視覺化的週時間規劃工具，使用 Lego 積木的概念讓時間分配更直觀有趣。
+一個視覺化的週時間規劃工具，使用積木的概念讓時間分配更直觀有趣。
 
 ## 功能特色
 
@@ -24,25 +24,25 @@
 ## 專案結構
 
 ```
-LegoTimePlanner/
+BlocksTime/
 ├── Models/
 │   ├── Category.swift          # 類別資料模型
-│   └── LegoColor.swift          # 顏色定義和 Hex 轉換
+│   └── LegoColor.swift         # 顏色定義和 Hex 轉換
 ├── ViewModels/
-│   └── CategoryViewModel.swift  # 主要業務邏輯
+│   └── CategoryViewModel.swift # 主要業務邏輯
 ├── Views/
-│   ├── ContentView.swift        # 主視圖
-│   ├── CategoryListView.swift   # 左側類別列表
-│   ├── BlocksGridView.swift     # 積木網格顯示
-│   ├── StatsView.swift          # 統計面板
+│   ├── ContentView.swift       # 主視圖
+│   ├── CategoryListView.swift  # 左側類別列表
+│   ├── BlocksGridView.swift    # 積木網格顯示
+│   ├── StatsView.swift         # 統計面板
 │   └── Components/
-│       ├── CategoryRow.swift    # 類別項目
-│       └── LegoBlock.swift      # Lego 積木元件
+│       ├── CategoryRow.swift   # 類別項目
+│       └── LegoBlock.swift     # 積木元件
 ├── Utilities/
-│   ├── Constants.swift          # 常數定義
-│   └── LocalStorage.swift       # 本地儲存管理
+│   ├── Constants.swift         # 常數定義
+│   └── LocalStorage.swift      # 本地儲存管理
 ├── Info.plist
-└── LegoTimePlannerApp.swift    # App 入口
+└── BlocksTimeApp.swift         # App 入口
 ```
 
 ## 技術棧
@@ -66,7 +66,7 @@ LegoTimePlanner/
    cd blockstime
    ```
 
-2. 雙擊 `LegoTimePlanner.xcodeproj` 開啟專案
+2. 雙擊 `BlocksTime.xcodeproj` 開啟專案
 
 3. 選擇目標裝置並運行:
    - 選擇 iPhone 或 iPad 模擬器 (iOS 15+)
@@ -116,7 +116,7 @@ Constants.blockHours = 1.0      // 每個積木代表 1 小時
 
 ### 顏色系統
 
-8 種預設 Lego 顏色:
+8 種預設顏色：
 - 紅色 (#E63946)
 - 橙色 (#F77F00)
 - 綠色 (#06A77D)

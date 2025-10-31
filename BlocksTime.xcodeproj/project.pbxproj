@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D0A001 /* LegoTimePlannerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A002 /* LegoTimePlannerApp.swift */; };
+		D0A001 /* BlocksTimeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A002 /* BlocksTimeApp.swift */; };
 		D0A003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A004 /* ContentView.swift */; };
 		D0A005 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A006 /* Category.swift */; };
 		D0A007 /* LegoColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A008 /* LegoColor.swift */; };
@@ -22,8 +22,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		D0A025 /* LegoTimePlanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LegoTimePlanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D0A002 /* LegoTimePlannerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegoTimePlannerApp.swift; sourceTree = "<group>"; };
+		D0A025 /* BlocksTime.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlocksTime.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0A002 /* BlocksTimeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocksTimeApp.swift; sourceTree = "<group>"; };
 		D0A004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D0A006 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		D0A008 /* LegoColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegoColor.swift; sourceTree = "<group>"; };
@@ -52,28 +52,28 @@
 		D0A028 = {
 			isa = PBXGroup;
 			children = (
-				D0A029 /* LegoTimePlanner */,
+				D0A029 /* BlocksTime */,
 				D0A030 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		D0A029 /* LegoTimePlanner */ = {
+		D0A029 /* BlocksTime */ = {
 			isa = PBXGroup;
 			children = (
-				D0A002 /* LegoTimePlannerApp.swift */,
+				D0A002 /* BlocksTimeApp.swift */,
 				D0A031 /* Models */,
 				D0A032 /* ViewModels */,
 				D0A033 /* Views */,
 				D0A034 /* Utilities */,
 				D0A026 /* Info.plist */,
 			);
-			path = LegoTimePlanner;
+			path = BlocksTime;
 			sourceTree = "<group>";
 		};
 		D0A030 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D0A025 /* LegoTimePlanner.app */,
+				D0A025 /* BlocksTime.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -128,9 +128,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D0A036 /* LegoTimePlanner */ = {
+		D0A036 /* BlocksTime */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D0A037 /* Build configuration list for PBXNativeTarget "LegoTimePlanner" */;
+			buildConfigurationList = D0A037 /* Build configuration list for PBXNativeTarget "BlocksTime" */;
 			buildPhases = (
 				D0A038 /* Sources */,
 				D0A027 /* Frameworks */,
@@ -140,9 +140,9 @@
 			);
 			dependencies = (
 			);
-			name = LegoTimePlanner;
-			productName = LegoTimePlanner;
-			productReference = D0A025 /* LegoTimePlanner.app */;
+			name = BlocksTime;
+			productName = BlocksTime;
+			productReference = D0A025 /* BlocksTime.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -160,7 +160,7 @@
 					};
 				};
 			};
-			buildConfigurationList = D0A041 /* Build configuration list for PBXProject "LegoTimePlanner" */;
+			buildConfigurationList = D0A041 /* Build configuration list for PBXProject "BlocksTime" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = "zh-Hant";
 			hasScannedForEncodings = 0;
@@ -174,7 +174,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D0A036 /* LegoTimePlanner */,
+				D0A036 /* BlocksTime */,
 			);
 		};
 /* End PBXProject section */
@@ -195,7 +195,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D0A003 /* ContentView.swift in Sources */,
-				D0A001 /* LegoTimePlannerApp.swift in Sources */,
+				D0A001 /* BlocksTimeApp.swift in Sources */,
 				D0A005 /* Category.swift in Sources */,
 				D0A007 /* LegoColor.swift in Sources */,
 				D0A009 /* CategoryViewModel.swift in Sources */,
@@ -341,7 +341,7 @@
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = LegoTimePlanner/Info.plist;
+				INFOPLIST_FILE = BlocksTime/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -352,7 +352,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.blockstime.LegoTimePlanner;
+				PRODUCT_BUNDLE_IDENTIFIER = com.blockstime.BlocksTime;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -373,7 +373,7 @@
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = LegoTimePlanner/Info.plist;
+				INFOPLIST_FILE = BlocksTime/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -384,7 +384,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.blockstime.LegoTimePlanner;
+				PRODUCT_BUNDLE_IDENTIFIER = com.blockstime.BlocksTime;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -398,7 +398,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D0A037 /* Build configuration list for PBXNativeTarget "LegoTimePlanner" */ = {
+		D0A037 /* Build configuration list for PBXNativeTarget "BlocksTime" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D0A044 /* Debug */,
@@ -407,7 +407,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D0A041 /* Build configuration list for PBXProject "LegoTimePlanner" */ = {
+		D0A041 /* Build configuration list for PBXProject "BlocksTime" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D0A042 /* Debug */,
