@@ -25,14 +25,27 @@ jobs:
         with:
           github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
-      # 启用 GitHub 原生的 auto-merge 功能
-      - name: Enable auto-merge
+      # 等待一下让批准生效
+      - name: Wait for approval to register
+        run: sleep 5
+
+      # 尝试立即合并 PR
+      - name: Merge Pull Request
         run: |
-          gh pr merge ${{ github.event.pull_request.number }} --auto --squash
+          # 先尝试直接合并
+          if gh pr merge ${{ github.event.pull_request.number }} --squash --auto; then
+            echo "✅ PR #${{ github.event.pull_request.number }} 已设置为自动合并"
+            echo "如果有必需的检查，PR 将在检查通过后自动合并"
+            echo "如果没有必需检查，PR 将立即合并"
+          else
+            echo "⚠️ 无法启用自动合并，可能是因为分支保护设置"
+            echo "尝试直接合并..."
+            gh pr merge ${{ github.event.pull_request.number }} --squash || echo "❌ 合并失败，请检查分支保护规则"
+          fi
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Success message
         run: |
-          echo "✅ PR #${{ github.event.pull_request.number }} 已自动批准并启用 auto-merge"
-          echo "当所有检查通过后，PR 将自动合并"
+          echo "✅ PR #${{ github.event.pull_request.number }} 处理完成"
+          echo "已自动批准并尝试合并"

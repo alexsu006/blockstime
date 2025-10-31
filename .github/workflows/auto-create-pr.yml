@@ -1,0 +1,93 @@
+name: Auto Create PR
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      contents: write
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get branch name
+        id: branch
+        run: echo "name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+
+      - name: Check if PR exists
+        id: check_pr
+        run: |
+          PR_EXISTS=$(gh pr list --head "${{ steps.branch.outputs.name }}" --json number --jq length)
+          echo "exists=$PR_EXISTS" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Get commit messages for PR description
+        if: steps.check_pr.outputs.exists == '0'
+        id: commits
+        run: |
+          # 获取当前分支与默认分支的差异提交
+          BASE_BRANCH=$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
+
+          # 如果默认分支不存在，尝试常见的分支名
+          if [ -z "$BASE_BRANCH" ] || ! git rev-parse --verify "origin/$BASE_BRANCH" >/dev/null 2>&1; then
+            for branch in main master develop; do
+              if git rev-parse --verify "origin/$branch" >/dev/null 2>&1; then
+                BASE_BRANCH=$branch
+                break
+              fi
+            done
+          fi
+
+          echo "base=$BASE_BRANCH" >> $GITHUB_OUTPUT
+
+          # 获取提交信息
+          COMMITS=$(git log --pretty=format:"- %s" origin/$BASE_BRANCH..HEAD 2>/dev/null || git log --pretty=format:"- %s" -10)
+
+          # 保存到文件以处理多行
+          echo "$COMMITS" > /tmp/commits.txt
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Create Pull Request
+        if: steps.check_pr.outputs.exists == '0'
+        run: |
+          BASE_BRANCH="${{ steps.commits.outputs.base }}"
+          BRANCH_NAME="${{ steps.branch.outputs.name }}"
+
+          # 从提交信息生成 PR 标题和描述
+          COMMITS=$(cat /tmp/commits.txt)
+          FIRST_COMMIT=$(echo "$COMMITS" | head -1 | sed 's/^- //')
+
+          # 创建 PR 描述
+          PR_BODY="## Changes
+
+$COMMITS
+
+---
+*This PR was automatically created by Claude Code*"
+
+          # 创建 PR
+          gh pr create \
+            --title "$FIRST_COMMIT" \
+            --body "$PR_BODY" \
+            --base "$BASE_BRANCH" \
+            --head "$BRANCH_NAME"
+
+          echo "✅ PR created successfully for branch $BRANCH_NAME"
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: PR already exists
+        if: steps.check_pr.outputs.exists != '0'
+        run: |
+          echo "ℹ️ PR already exists for this branch, skipping creation"
