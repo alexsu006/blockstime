@@ -58,26 +58,23 @@ LegoTimePlanner/
 
 ### 在 Xcode 中開啟專案
 
-1. 使用 Xcode 創建新專案:
-   - 選擇 "App" 模板
-   - Product Name: `LegoTimePlanner`
-   - Interface: SwiftUI
-   - Language: Swift
-   - 取消勾選 "Use Core Data"
+**簡易版 (推薦):**
 
-2. 將本專案的所有檔案複製到 Xcode 專案中:
+1. 下載或克隆此專案:
    ```bash
-   # 在終端機中執行
-   cp -r LegoTimePlanner/* <你的Xcode專案路徑>/LegoTimePlanner/
+   git clone <repository-url>
+   cd blockstime
    ```
 
-3. 在 Xcode 中添加檔案:
-   - 右鍵點擊專案 → "Add Files to..."
-   - 選擇所有 .swift 檔案
+2. 雙擊 `LegoTimePlanner.xcodeproj` 開啟專案
 
-4. 運行專案:
-   - 選擇目標裝置 (iPhone 或 iPad 模擬器)
-   - 點擊 ▶️ Run
+3. 選擇目標裝置並運行:
+   - 選擇 iPhone 或 iPad 模擬器 (iOS 15+)
+   - 點擊 ▶️ Run (或按 Cmd+R)
+
+**完整版 (手動設置):**
+
+如果需要從頭創建專案，請參考 [SETUP_GUIDE.md](SETUP_GUIDE.md) 獲取詳細步驟。
 
 ### 功能使用
 
