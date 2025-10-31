@@ -15,7 +15,7 @@ struct BlocksGridView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 15) {
-                ForEach(viewModel.visibleCategories()) { category in
+                ForEach(viewModel.categories.filter { $0.hours > 0 }) { category in
                     CategoryBlockGroup(
                         category: category,
                         draggedBlock: $draggedBlock,

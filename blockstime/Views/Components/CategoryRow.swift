@@ -14,8 +14,7 @@ struct CategoryRow: View {
     let onColorTap: () -> Void
     let onRemove: () -> Void
 
-    @State private var hoursText: String = ""
-    @FocusState private var isHoursFocused: Bool
+    @State private var sliderValue: Double
 
     init(category: Category,
          onNameChange: @escaping (String) -> Void,
@@ -27,7 +26,7 @@ struct CategoryRow: View {
         self.onHoursChange = onHoursChange
         self.onColorTap = onColorTap
         self.onRemove = onRemove
-        _hoursText = State(initialValue: String(format: "%.1f", category.hours))
+        _sliderValue = State(initialValue: category.hours)
     }
 
     var body: some View {
@@ -84,65 +83,39 @@ struct CategoryRow: View {
                 .buttonStyle(PlainButtonStyle())
             }
 
-            // Hours input with quick adjustment buttons
-            HStack(spacing: 6) {
-                // Decrease button
-                Button(action: {
-                    let newHours = max(0, category.hours - 1)
-                    onHoursChange(newHours)
-                    hoursText = String(format: "%.1f", newHours)
-                }) {
-                    ZStack {
-                        Color.clear
-                        Image(systemName: "minus.circle.fill")
-                            .font(.system(size: 22))
-                            .foregroundColor(Color(hex: "#FF6B6B"))
-                    }
-                    .frame(width: 44, height: 44)
+            // Hours slider with value display
+            VStack(spacing: 8) {
+                // Hours value display
+                HStack {
+                    Text("時數")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.gray)
+
+                    Spacer()
+
+                    Text(String(format: "%.1f h", sliderValue))
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(Color(hex: "#00D9A3"))
                 }
-                .buttonStyle(PlainButtonStyle())
 
-                // Hours text field
-                TextField("0.0", text: $hoursText)
-                    .keyboardType(.decimalPad)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(height: 32)
-                    .multilineTextAlignment(.center)
-                    .focused($isHoursFocused)
-                    .onSubmit {
-                        if let newHours = Double(hoursText) {
-                            onHoursChange(newHours)
-                        } else {
-                            hoursText = String(format: "%.1f", category.hours)
+                // Slider
+                HStack(spacing: 8) {
+                    Text("0")
+                        .font(.system(size: 10))
+                        .foregroundColor(.gray)
+                        .frame(width: 20)
+
+                    Slider(value: $sliderValue, in: 0...Constants.totalHours, step: 0.5)
+                        .accentColor(category.color.mainColor)
+                        .onChange(of: sliderValue) { newValue in
+                            onHoursChange(newValue)
                         }
-                        isHoursFocused = false
-                    }
-                    .onChange(of: category.hours) { newValue in
-                        if !isHoursFocused {
-                            hoursText = String(format: "%.1f", newValue)
-                        }
-                    }
 
-                Text("h")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.gray)
-                    .frame(width: 20)
-
-                // Increase button
-                Button(action: {
-                    let newHours = min(Constants.totalHours, category.hours + 1)
-                    onHoursChange(newHours)
-                    hoursText = String(format: "%.1f", newHours)
-                }) {
-                    ZStack {
-                        Color.clear
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 22))
-                            .foregroundColor(Color(hex: "#00D9A3"))
-                    }
-                    .frame(width: 44, height: 44)
+                    Text("\(Int(Constants.totalHours))")
+                        .font(.system(size: 10))
+                        .foregroundColor(.gray)
+                        .frame(width: 30)
                 }
-                .buttonStyle(PlainButtonStyle())
             }
 
             // Stats
@@ -167,5 +140,11 @@ struct CategoryRow: View {
                 .stroke(Color(hex: "#333333"), lineWidth: 2)
                 .allowsHitTesting(false)
         )
+        .onChange(of: category.hours) { newValue in
+            // Sync external changes to slider
+            if abs(sliderValue - newValue) > 0.01 {
+                sliderValue = newValue
+            }
+        }
     }
 }
