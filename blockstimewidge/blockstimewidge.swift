@@ -290,13 +290,6 @@ struct SmallWidgetView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.black.opacity(0.8), Color.black.opacity(0.6)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
         }
     }
 }
@@ -417,13 +410,6 @@ struct MediumWidgetView: View {
                 .padding(.vertical, 10)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.black.opacity(0.8), Color.black.opacity(0.6)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
         }
     }
 }
@@ -549,13 +535,6 @@ struct LargeWidgetView: View {
                 .padding(.bottom, 12)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.black.opacity(0.8), Color.black.opacity(0.6)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
         }
     }
 }
@@ -569,12 +548,40 @@ struct blockstimewidgeEntryView : View {
         switch family {
         case .systemSmall:
             SmallWidgetView(categories: entry.categories)
+                .containerBackground(for: .widget) {
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.black.opacity(0.8), Color.black.opacity(0.6)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
         case .systemMedium:
             MediumWidgetView(categories: entry.categories)
+                .containerBackground(for: .widget) {
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.black.opacity(0.8), Color.black.opacity(0.6)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
         case .systemLarge, .systemExtraLarge:
             LargeWidgetView(categories: entry.categories)
+                .containerBackground(for: .widget) {
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.black.opacity(0.8), Color.black.opacity(0.6)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
         default:
             SmallWidgetView(categories: entry.categories)
+                .containerBackground(for: .widget) {
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.black.opacity(0.8), Color.black.opacity(0.6)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
         }
     }
 }
