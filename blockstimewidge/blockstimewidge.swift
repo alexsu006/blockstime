@@ -221,29 +221,30 @@ struct SmallWidgetView: View {
             return (7, 7, 10, 2)
         }
 
-        let titleHeight: CGFloat = 24
-        let padding: CGFloat = 16
+        let titleHeight: CGFloat = 20
+        let padding: CGFloat = 12
         let availableWidth = width - padding
         let availableHeight = height - titleHeight - padding
 
         // For 168 blocks, try to find the best grid that fits
         var bestColumns = 7
         var bestRows = 24
-        var bestBlockSize: CGFloat = 8
-        var bestSpacing: CGFloat = 1.5
+        var bestBlockSize: CGFloat = 6
+        var bestSpacing: CGFloat = 1.0
 
         // Try different column counts to find optimal layout
-        for cols in stride(from: 12, through: 7, by: -1) {
+        // Small widget needs more columns to fit all 168 blocks
+        for cols in stride(from: 14, through: 7, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 1.5
+            let spacing: CGFloat = 1.0
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
 
             let blockSize = min(widthBasedSize, heightBasedSize)
 
-            // Make sure all blocks fit
-            if blockSize >= 6 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
+            // Make sure all blocks fit - reduced minimum size to 4
+            if blockSize >= 4 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -316,29 +317,30 @@ struct MediumWidgetView: View {
             return (14, 12, 12, 2)
         }
 
-        let legendWidth: CGFloat = 70
-        let titleHeight: CGFloat = 26
-        let padding: CGFloat = 24
+        let legendWidth: CGFloat = 60
+        let titleHeight: CGFloat = 24
+        let padding: CGFloat = 20
         let availableWidth = width - legendWidth - padding
         let availableHeight = height - titleHeight - padding
 
         var bestColumns = 14
         var bestRows = 12
-        var bestBlockSize: CGFloat = 10
-        var bestSpacing: CGFloat = 2
+        var bestBlockSize: CGFloat = 8
+        var bestSpacing: CGFloat = 1.5
 
         // Try different column counts to find optimal layout
-        for cols in stride(from: 18, through: 10, by: -1) {
+        // Medium widget needs more columns to fit all 168 blocks
+        for cols in stride(from: 21, through: 12, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 2
+            let spacing: CGFloat = 1.5
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
 
             let blockSize = min(widthBasedSize, heightBasedSize)
 
-            // Make sure all blocks fit
-            if blockSize >= 8 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
+            // Make sure all blocks fit - reduced minimum size to 6
+            if blockSize >= 6 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -440,30 +442,31 @@ struct LargeWidgetView: View {
             return (14, 12, 16, 3)
         }
 
-        let headerHeight: CGFloat = 44
-        let legendHeight: CGFloat = 42
-        let horizontalPadding: CGFloat = 24
-        let verticalPadding: CGFloat = 20
+        let headerHeight: CGFloat = 40
+        let legendHeight: CGFloat = 38
+        let horizontalPadding: CGFloat = 20
+        let verticalPadding: CGFloat = 16
         let availableWidth = width - horizontalPadding
         let availableHeight = height - headerHeight - legendHeight - verticalPadding
 
         var bestColumns = 14
         var bestRows = 12
-        var bestBlockSize: CGFloat = 16
-        var bestSpacing: CGFloat = 3
+        var bestBlockSize: CGFloat = 14
+        var bestSpacing: CGFloat = 2.5
 
         // Try different column counts to find optimal layout
-        for cols in stride(from: 20, through: 10, by: -1) {
+        // Large widget can use more columns for better space utilization
+        for cols in stride(from: 24, through: 14, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 3
+            let spacing: CGFloat = 2.5
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
 
             let blockSize = min(widthBasedSize, heightBasedSize)
 
-            // Make sure all blocks fit
-            if blockSize >= 12 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
+            // Make sure all blocks fit - reduced minimum size to 10 for better flexibility
+            if blockSize >= 10 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
