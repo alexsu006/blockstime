@@ -1,11 +1,11 @@
-# Lego 時間規劃器 - Xcode 專案設置指南
+# BlocksTime - Xcode 專案設置指南
 
 ## 方法一：直接使用包含的 Xcode 專案 (最簡單，推薦)
 
-本專案已包含完整的 Xcode 專案文件 (`LegoTimePlanner.xcodeproj`)，可以直接開啟使用:
+本專案已包含完整的 Xcode 專案文件 (`BlocksTime.xcodeproj`)，可以直接開啟使用:
 
 1. 克隆或下載專案
-2. 雙擊 `LegoTimePlanner.xcodeproj` 開啟專案
+2. 雙擊 `BlocksTime.xcodeproj` 開啟專案
 3. 選擇目標裝置並點擊 ▶️ Run
 
 這個方法可以避免常見的建置錯誤，如 "Multiple commands produce" 錯誤。
@@ -24,10 +24,10 @@
 ### 步驟 2: 配置專案
 
 在專案設置頁面填寫:
-- **Product Name**: `LegoTimePlanner`
+- **Product Name**: `BlocksTime`
 - **Team**: 選擇你的開發團隊 (如果沒有可先選 None)
 - **Organization Identifier**: `com.yourname` (自定義)
-- **Bundle Identifier**: 自動生成 `com.yourname.LegoTimePlanner`
+- **Bundle Identifier**: 自動生成 `com.yourname.BlocksTime`
 - **Interface**: **SwiftUI** ⚠️ 重要!
 - **Language**: **Swift**
 - **Storage**: 不勾選 "Use Core Data"
@@ -42,7 +42,7 @@
    - 右鍵點擊專案名稱 > "New Group"
    - 創建以下群組:
      ```
-     LegoTimePlanner/
+     BlocksTime/
      ├── Models
      ├── ViewModels
      ├── Views
@@ -53,7 +53,7 @@
 ### 步驟 4: 添加源碼文件
 
 #### 方法 A: 拖拽添加 (簡單)
-1. 打開 Finder，找到本專案的 `LegoTimePlanner` 資料夾
+1. 打開 Finder，找到本專案的 `BlocksTime` 資料夾
 2. 將對應的 `.swift` 文件拖拽到 Xcode 對應的群組中
 3. 確保勾選 "Copy items if needed"
 
@@ -88,14 +88,14 @@
 - `LocalStorage.swift`
 
 **根目錄:**
-- `LegoTimePlannerApp.swift`
+- `BlocksTimeApp.swift`
 - `Info.plist` (如果沒有自動生成)
 
 ### 步驟 6: 配置 Info.plist
 
 1. 在專案導航器中找到 `Info.plist`
 2. 確保包含以下設定:
-   - Display Name: `Lego時間規劃器`
+   - Display Name: `BlocksTime`
    - Supported Interface Orientations: 包含 Portrait 和 Landscape
 
 或直接使用本專案提供的 `Info.plist` 文件。
@@ -118,8 +118,8 @@
 #!/bin/bash
 
 # 創建專案目錄
-PROJECT_NAME="LegoTimePlanner"
-BUNDLE_ID="com.yourname.LegoTimePlanner"
+PROJECT_NAME="BlocksTime"
+BUNDLE_ID="com.yourname.BlocksTime"
 
 # 使用 xcodegen 或手動創建 .xcodeproj
 # (需要額外安裝工具)
@@ -146,7 +146,7 @@ echo "請使用方法一手動創建，更簡單可靠"
 **問題**: 這是 Xcode 最常見的建置錯誤之一，通常發生在 Info.plist 被錯誤地添加到 "Copy Bundle Resources" 階段。
 
 **解決方案**:
-- **最佳方案**: 使用本專案包含的 `LegoTimePlanner.xcodeproj` 文件，已正確配置
+- **最佳方案**: 使用本專案包含的 `BlocksTime.xcodeproj` 文件，已正確配置
 - **手動修復**:
   1. 在 Xcode 中選擇專案 → Target → Build Phases
   2. 展開 "Copy Bundle Resources"

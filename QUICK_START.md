@@ -9,9 +9,9 @@ cd blockstime
 ```
 
 ### 步驟 2: 開啟專案 (30 秒)
-雙擊 `LegoTimePlanner.xcodeproj` 或在終端執行:
+雙擊 `BlocksTime.xcodeproj` 或在終端執行:
 ```bash
-open LegoTimePlanner.xcodeproj
+open BlocksTime.xcodeproj
 ```
 
 ### 步驟 3: 運行! (1 分鐘)
@@ -31,14 +31,14 @@ open LegoTimePlanner.xcodeproj
 ```
 
 配置:
-- Product Name: `LegoTimePlanner`
+- Product Name: `BlocksTime`
 - Interface: **SwiftUI** ⚠️
 - Language: Swift
 
 ### 步驟 2: 複製文件
 
 #### 方式 A: 直接拖拽 (推薦)
-1. 在 Finder 中打開 `LegoTimePlanner` 資料夾
+1. 在 Finder 中打開 `BlocksTime` 資料夾
 2. 全選所有 `.swift` 文件 (Cmd+A)
 3. 拖拽到 Xcode 專案中
 4. 勾選 "Copy items if needed"
@@ -46,7 +46,7 @@ open LegoTimePlanner.xcodeproj
 #### 方式 B: 手動複製
 ```bash
 cd /path/to/your/xcode/project
-cp -r /path/to/this/repo/LegoTimePlanner/* ./LegoTimePlanner/
+cp -r /path/to/this/repo/BlocksTime/* ./BlocksTime/
 ```
 
 ### 步驟 3: 整理文件
@@ -95,7 +95,7 @@ Utilities/
 **檢查**: 所有文件都添加了嗎？
 ```bash
 # 應該有這些文件
-LegoTimePlannerApp.swift
+BlocksTimeApp.swift
 Category.swift
 LegoColor.swift
 CategoryViewModel.swift
@@ -114,7 +114,7 @@ ContentView.swift
 ## 文件清單 (12 個必要文件)
 
 ### 核心文件 (3)
-- ✅ `LegoTimePlannerApp.swift` - App 入口
+- ✅ `BlocksTimeApp.swift` - App 入口
 - ✅ `Category.swift` - 資料模型
 - ✅ `LegoColor.swift` - 顏色系統
 
@@ -129,7 +129,7 @@ ContentView.swift
 
 ### 組件 (2)
 - ✅ `CategoryRow.swift` - 類別項目
-- ✅ `LegoBlock.swift` - Lego 積木
+- ✅ `LegoBlock.swift` - 積木元件
 
 ### 工具 (2)
 - ✅ `Constants.swift` - 常數

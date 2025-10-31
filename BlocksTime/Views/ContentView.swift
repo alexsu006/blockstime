@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  LegoTimePlanner
+//  BlocksTime
 //
 //  Created by Claude on 2025-10-30.
 //
@@ -66,7 +66,7 @@ struct ContentView: View {
         HStack(spacing: 8) {
             Text("🧱")
                 .font(.system(size: 32))
-            Text("Lego 時間規劃器")
+            Text("BlocksTime")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(
                     LinearGradient(
