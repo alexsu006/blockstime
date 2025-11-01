@@ -9,7 +9,8 @@ import WidgetKit
 import SwiftUI
 
 // MARK: - Shared Models
-struct WidgetCategory: Codable {
+// Note: These models mirror the main app's Category and LegoColor for data compatibility
+struct Category: Codable {
     let id: String
     let name: String
     let hours: Double
@@ -19,12 +20,12 @@ struct WidgetCategory: Codable {
         Int(ceil(hours / 1.0)) // 1 block = 1 hour
     }
 
-    var color: WidgetLegoColor {
-        WidgetLegoColor.allColors.first { $0.id == colorId } ?? WidgetLegoColor.allColors[0]
+    var color: LegoColor {
+        LegoColor.allColors.first { $0.id == colorId } ?? LegoColor.allColors[0]
     }
 }
 
-struct WidgetLegoColor: Codable {
+struct LegoColor: Codable {
     let id: String
     let main: String
     let light: String
@@ -47,15 +48,15 @@ struct WidgetLegoColor: Codable {
         Color(hex: glow)
     }
 
-    static let allColors: [WidgetLegoColor] = [
-        WidgetLegoColor(id: "red", main: "#E63946", light: "#FF6B6B", dark: "#A1161E", glow: "#E63946"),
-        WidgetLegoColor(id: "orange", main: "#F77F00", light: "#FFA500", dark: "#D66E00", glow: "#F77F00"),
-        WidgetLegoColor(id: "green", main: "#06A77D", light: "#00D9A3", dark: "#045A52", glow: "#06A77D"),
-        WidgetLegoColor(id: "blue", main: "#3A86FF", light: "#72B4FF", dark: "#1E3A8A", glow: "#3A86FF"),
-        WidgetLegoColor(id: "purple", main: "#8338EC", light: "#A867F3", dark: "#4C1D95", glow: "#8338EC"),
-        WidgetLegoColor(id: "deepOrange", main: "#FB5607", light: "#FF8C42", dark: "#C41E3A", glow: "#FB5607"),
-        WidgetLegoColor(id: "pink", main: "#FF006E", light: "#FF5C9A", dark: "#AD004C", glow: "#FF006E"),
-        WidgetLegoColor(id: "white", main: "#F1FAEE", light: "#FFFFFF", dark: "#BDC4CB", glow: "#F1FAEE")
+    static let allColors: [LegoColor] = [
+        LegoColor(id: "red", main: "#E63946", light: "#FF6B6B", dark: "#A1161E", glow: "#E63946"),
+        LegoColor(id: "orange", main: "#F77F00", light: "#FFA500", dark: "#D66E00", glow: "#F77F00"),
+        LegoColor(id: "green", main: "#06A77D", light: "#00D9A3", dark: "#045A52", glow: "#06A77D"),
+        LegoColor(id: "blue", main: "#3A86FF", light: "#72B4FF", dark: "#1E3A8A", glow: "#3A86FF"),
+        LegoColor(id: "purple", main: "#8338EC", light: "#A867F3", dark: "#4C1D95", glow: "#8338EC"),
+        LegoColor(id: "deepOrange", main: "#FB5607", light: "#FF8C42", dark: "#C41E3A", glow: "#FB5607"),
+        LegoColor(id: "pink", main: "#FF006E", light: "#FF5C9A", dark: "#AD004C", glow: "#FF006E"),
+        LegoColor(id: "white", main: "#F1FAEE", light: "#FFFFFF", dark: "#BDC4CB", glow: "#F1FAEE")
     ]
 }
 
@@ -97,7 +98,7 @@ class WidgetDataProvider {
         UserDefaults(suiteName: appGroupId)
     }
 
-    func loadCategories() -> [WidgetCategory] {
+    func loadCategories() -> [Category] {
         guard let data = sharedDefaults?.data(forKey: storageKey) else {
             print("⚠️ Widget: No saved data found, using defaults")
             return defaultCategories()
@@ -105,23 +106,27 @@ class WidgetDataProvider {
 
         do {
             let decoder = JSONDecoder()
-            // Try to decode as WidgetCategory first
-            if let categories = try? decoder.decode([WidgetCategory].self, from: data) {
-                print("✅ Widget: Successfully loaded \(categories.count) categories from shared storage")
-                return categories
+            let categories = try decoder.decode([Category].self, from: data)
+            print("✅ Widget: Successfully loaded \(categories.count) categories from shared storage")
+
+            // Log loaded categories for debugging
+            for category in categories where category.hours > 0 {
+                print("   - \(category.name): \(category.hours)h (color: \(category.colorId))")
             }
 
-            // Fallback to a generic dictionary approach for compatibility
-            print("⚠️ Widget: Failed to decode, using default categories")
+            return categories
+        } catch {
+            print("❌ Widget: Failed to decode categories: \(error.localizedDescription)")
+            print("⚠️ Widget: Using default categories")
             return defaultCategories()
         }
     }
 
-    private func defaultCategories() -> [WidgetCategory] {
+    private func defaultCategories() -> [Category] {
         return [
-            WidgetCategory(id: UUID().uuidString, name: "睡眠", hours: 56, colorId: "red"),
-            WidgetCategory(id: UUID().uuidString, name: "工作", hours: 40, colorId: "orange"),
-            WidgetCategory(id: UUID().uuidString, name: "自由", hours: 72, colorId: "green")
+            Category(id: UUID().uuidString, name: "睡眠", hours: 56, colorId: "red"),
+            Category(id: UUID().uuidString, name: "工作", hours: 40, colorId: "orange"),
+            Category(id: UUID().uuidString, name: "自由", hours: 72, colorId: "green")
         ]
     }
 }
@@ -155,17 +160,17 @@ struct Provider: TimelineProvider {
 
 struct BlocksEntry: TimelineEntry {
     let date: Date
-    let categories: [WidgetCategory]
+    let categories: [Category]
 }
 
 // MARK: - Widget Block View
 struct WidgetLegoBlock: View {
     let number: Int?
-    let color: WidgetLegoColor
+    let color: LegoColor
     let size: CGFloat
     let showNumber: Bool
 
-    init(number: Int? = nil, color: WidgetLegoColor, size: CGFloat, showNumber: Bool = true) {
+    init(number: Int? = nil, color: LegoColor, size: CGFloat, showNumber: Bool = true) {
         self.number = number
         self.color = color
         self.size = size
@@ -208,10 +213,10 @@ struct WidgetLegoBlock: View {
 
 // MARK: - Small Widget View
 struct SmallWidgetView: View {
-    let categories: [WidgetCategory]
+    let categories: [Category]
 
-    private var allBlocks: [(category: WidgetCategory, blockIndex: Int)] {
-        var blocks: [(WidgetCategory, Int)] = []
+    private var allBlocks: [(category: Category, blockIndex: Int)] {
+        var blocks: [(Category, Int)] = []
         for category in categories.filter({ $0.hours > 0 }) {
             for index in 0..<category.blocksCount {
                 blocks.append((category, index))
@@ -304,10 +309,10 @@ struct SmallWidgetView: View {
 
 // MARK: - Medium Widget View
 struct MediumWidgetView: View {
-    let categories: [WidgetCategory]
+    let categories: [Category]
 
-    private var allBlocks: [(category: WidgetCategory, blockIndex: Int)] {
-        var blocks: [(WidgetCategory, Int)] = []
+    private var allBlocks: [(category: Category, blockIndex: Int)] {
+        var blocks: [(Category, Int)] = []
         for category in categories.filter({ $0.hours > 0 }) {
             for index in 0..<category.blocksCount {
                 blocks.append((category, index))
@@ -429,10 +434,10 @@ struct MediumWidgetView: View {
 
 // MARK: - Large Widget View
 struct LargeWidgetView: View {
-    let categories: [WidgetCategory]
+    let categories: [Category]
 
-    private var allBlocks: [(category: WidgetCategory, blockIndex: Int)] {
-        var blocks: [(WidgetCategory, Int)] = []
+    private var allBlocks: [(category: Category, blockIndex: Int)] {
+        var blocks: [(Category, Int)] = []
         for category in categories.filter({ $0.hours > 0 }) {
             for index in 0..<category.blocksCount {
                 blocks.append((category, index))
