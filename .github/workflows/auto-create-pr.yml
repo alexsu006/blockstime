@@ -51,7 +51,7 @@ jobs:
           echo "base=$BASE_BRANCH" >> $GITHUB_OUTPUT
 
           # 获取提交信息
-          COMMITS=$(git log --pretty=format:"- %s" origin/$BASE_BRANCH..HEAD 2>/dev/null || git log --pretty=format:"- %s" -10)
+          COMMITS=$(git log --pretty=format:'- %s' origin/$BASE_BRANCH..HEAD 2>/dev/null || git log --pretty=format:'- %s' -10)
 
           # 保存到文件以处理多行
           echo "$COMMITS" > /tmp/commits.txt
