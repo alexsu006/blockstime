@@ -255,6 +255,11 @@ struct SmallWidgetView: View {
         return blocks
     }
 
+    // Get the top category by hours
+    private var topCategory: Category? {
+        categories.filter({ $0.hours > 0 }).max(by: { $0.hours < $1.hours })
+    }
+
     // Calculate optimal layout for small widget - fits all blocks without scrolling
     private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
         let totalBlocks = allBlocks.count
@@ -262,30 +267,31 @@ struct SmallWidgetView: View {
             return (7, 7, 10, 2)
         }
 
-        let titleHeight: CGFloat = 20
-        let padding: CGFloat = 12
+        let headerHeight: CGFloat = 32  // Increased for title + stat
+        let legendHeight: CGFloat = 48  // Space for categories legend
+        let padding: CGFloat = 16
         let availableWidth = width - padding
-        let availableHeight = height - titleHeight - padding
+        let availableHeight = height - headerHeight - legendHeight - padding
 
         // For 168 blocks, try to find the best grid that fits
         var bestColumns = 7
         var bestRows = 24
         var bestBlockSize: CGFloat = 6
-        var bestSpacing: CGFloat = 1.0
+        var bestSpacing: CGFloat = 1.2
 
         // Try different column counts to find optimal layout
         // Small widget needs more columns to fit all 168 blocks
         for cols in stride(from: 14, through: 7, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 1.0
+            let spacing: CGFloat = 1.2
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
 
             let blockSize = min(widthBasedSize, heightBasedSize)
 
-            // Make sure all blocks fit - reduced minimum size to 4
-            if blockSize >= 4 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
+            // Make sure all blocks fit - minimum size 5
+            if blockSize >= 5 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -304,16 +310,33 @@ struct SmallWidgetView: View {
             let blockSize = layout.blockSize
             let spacing = layout.spacing
 
-            VStack(spacing: 4) {
-                // Title
-                HStack {
-                    Text("Blocks Time")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.white)
-                    Spacer()
+            VStack(spacing: 6) {
+                // Header with key stat
+                VStack(spacing: 2) {
+                    HStack {
+                        Text("週時間")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Text("168h")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.white.opacity(0.6))
+                    }
+
+                    if let top = topCategory {
+                        HStack {
+                            Text(top.name)
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(top.color.mainColor)
+                            Text("\(Int(top.hours))h")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(.white)
+                            Spacer()
+                        }
+                    }
                 }
-                .padding(.horizontal, 8)
-                .padding(.top, 8)
+                .padding(.horizontal, 10)
+                .padding(.top, 10)
 
                 // Blocks Grid (NO ScrollView - widgets can't scroll)
                 LazyVGrid(
@@ -329,7 +352,24 @@ struct SmallWidgetView: View {
                         )
                     }
                 }
-                .padding(.horizontal, 8)
+                .padding(.horizontal, 10)
+
+                // Compact legend
+                HStack(spacing: 6) {
+                    ForEach(categories.filter({ $0.hours > 0 }).prefix(3), id: \.id) { category in
+                        HStack(spacing: 3) {
+                            Circle()
+                                .fill(category.color.mainColor)
+                                .frame(width: 6, height: 6)
+                            Text(category.name)
+                                .font(.system(size: 8, weight: .medium))
+                                .foregroundColor(.white.opacity(0.8))
+                                .lineLimit(1)
+                        }
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 10)
                 .padding(.bottom, 8)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -358,30 +398,30 @@ struct MediumWidgetView: View {
             return (14, 12, 12, 2)
         }
 
-        let legendWidth: CGFloat = 60
-        let titleHeight: CGFloat = 24
-        let padding: CGFloat = 20
+        let legendWidth: CGFloat = 78  // Increased for better legend display
+        let titleHeight: CGFloat = 26
+        let padding: CGFloat = 18
         let availableWidth = width - legendWidth - padding
         let availableHeight = height - titleHeight - padding
 
         var bestColumns = 14
         var bestRows = 12
         var bestBlockSize: CGFloat = 8
-        var bestSpacing: CGFloat = 1.5
+        var bestSpacing: CGFloat = 2.0  // Slightly increased for better visual separation
 
         // Try different column counts to find optimal layout
         // Medium widget needs more columns to fit all 168 blocks
         for cols in stride(from: 21, through: 12, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 1.5
+            let spacing: CGFloat = 2.0
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
 
             let blockSize = min(widthBasedSize, heightBasedSize)
 
-            // Make sure all blocks fit - reduced minimum size to 6
-            if blockSize >= 6 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
+            // Make sure all blocks fit - minimum size 7 for better visibility
+            if blockSize >= 7 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -427,33 +467,43 @@ struct MediumWidgetView: View {
                 }
                 .padding(10)
 
-                // Legend
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("分類")
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(.white.opacity(0.7))
-
+                // Legend - Optimized for medium widget
+                VStack(alignment: .leading, spacing: 8) {
                     ForEach(categories.filter({ $0.hours > 0 }), id: \.id) { category in
-                        HStack(spacing: 3) {
-                            RoundedRectangle(cornerRadius: 2)
-                                .fill(category.color.mainColor)
-                                .frame(width: 10, height: 10)
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 4) {
+                                RoundedRectangle(cornerRadius: 3)
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                category.color.lightColor,
+                                                category.color.mainColor
+                                            ]),
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .frame(width: 12, height: 12)
 
-                            VStack(alignment: .leading, spacing: 0) {
                                 Text(category.name)
-                                    .font(.system(size: 9, weight: .medium))
+                                    .font(.system(size: 10, weight: .semibold))
                                     .foregroundColor(.white)
                                     .lineLimit(1)
-                                Text("\(Int(category.hours))h")
-                                    .font(.system(size: 8))
-                                    .foregroundColor(.white.opacity(0.6))
                             }
+
+                            Text("\(Int(category.hours))h")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.white)
+
+                            Text("\(Int(category.hours / 168.0 * 100))%")
+                                .font(.system(size: 9, weight: .medium))
+                                .foregroundColor(.white.opacity(0.7))
                         }
                     }
 
                     Spacer()
                 }
-                .frame(width: 60)
+                .frame(width: 70)
                 .padding(.trailing, 8)
                 .padding(.vertical, 10)
             }
@@ -484,31 +534,31 @@ struct LargeWidgetView: View {
         }
 
         // Optimized spacing to maximize block display area
-        let headerHeight: CGFloat = 45  // Slightly increased for larger fonts
-        let legendHeight: CGFloat = 35  // Reduced to save space
-        let horizontalPadding: CGFloat = 16  // Reduced from 20
-        let verticalPadding: CGFloat = 12  // Reduced from 16
+        let headerHeight: CGFloat = 40  // Reduced for single-line header
+        let legendHeight: CGFloat = 40  // Slightly increased for better readability
+        let horizontalPadding: CGFloat = 24  // Increased for better margins
+        let verticalPadding: CGFloat = 16
         let availableWidth = width - horizontalPadding
         let availableHeight = height - headerHeight - legendHeight - verticalPadding
 
         var bestColumns = 14
         var bestRows = 12
         var bestBlockSize: CGFloat = 20  // Default target block size
-        var bestSpacing: CGFloat = 3.5  // Increased from 2.5
+        var bestSpacing: CGFloat = 2.8  // Slightly reduced for tighter grid
 
         // Try different column counts to find optimal layout
         // Large widget can use more columns for better space utilization
         for cols in stride(from: 24, through: 14, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 3.5  // Larger spacing for better visual separation
+            let spacing: CGFloat = 2.8  // Tighter spacing for modern look
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
 
             let blockSize = min(widthBasedSize, heightBasedSize)
 
-            // Increased minimum size to 12 for larger, more visible blocks
-            if blockSize >= 12 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
+            // Increased minimum size to 13 for better visibility
+            if blockSize >= 13 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -528,23 +578,26 @@ struct LargeWidgetView: View {
             let spacing = layout.spacing
 
             VStack(spacing: 6) {
-                // Header - Larger fonts for better visibility
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Blocks Time Planner")
-                            .font(.system(size: 18, weight: .bold))  // Increased from 15
-                            .foregroundColor(.white)
-                        Text("週時間視覺化")
-                            .font(.system(size: 12))  // Increased from 10
-                            .foregroundColor(.white.opacity(0.7))
-                    }
-                    Spacer()
+                // Header - Optimized for clarity and space
+                HStack(alignment: .center, spacing: 8) {
+                    Text("週時間規劃")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+
                     Text("168小時")
-                        .font(.system(size: 16, weight: .semibold))  // Increased from 13
-                        .foregroundColor(.white.opacity(0.8))
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white.opacity(0.6))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color.white.opacity(0.1))
+                        )
+
+                    Spacer()
                 }
-                .padding(.horizontal, 10)  // Reduced from 12 for more space
-                .padding(.top, 10)  // Reduced from 12
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
 
                 // Blocks Grid (NO ScrollView - widgets can't scroll)
                 LazyVGrid(
@@ -562,29 +615,43 @@ struct LargeWidgetView: View {
                 }
                 .padding(.horizontal, 10)  // Reduced from 12 for more space
 
-                // Categories Legend - Larger fonts and icons
-                HStack(spacing: 12) {  // Increased spacing from 10
+                // Categories Legend - Enhanced visibility
+                HStack(spacing: 16) {
                     ForEach(categories.filter({ $0.hours > 0 }), id: \.id) { category in
-                        HStack(spacing: 5) {  // Increased from 4
-                            RoundedRectangle(cornerRadius: 3)  // Increased radius from 2
-                                .fill(category.color.mainColor)
-                                .frame(width: 16, height: 16)  // Increased from 14x14
+                        HStack(spacing: 6) {
+                            // Color indicator with gradient
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            category.color.lightColor,
+                                            category.color.mainColor
+                                        ]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 18, height: 18)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .stroke(category.color.darkColor.opacity(0.3), lineWidth: 1)
+                                )
 
-                            VStack(alignment: .leading, spacing: 0) {
+                            VStack(alignment: .leading, spacing: 1) {
                                 Text(category.name)
-                                    .font(.system(size: 12, weight: .medium))  // Increased from 10
+                                    .font(.system(size: 13, weight: .semibold))
                                     .foregroundColor(.white)
                                     .lineLimit(1)
-                                Text("\(Int(category.hours))h (\(Int(category.hours / 168.0 * 100))%)")
-                                    .font(.system(size: 10))  // Increased from 8
-                                    .foregroundColor(.white.opacity(0.6))
+                                Text("\(Int(category.hours))h · \(Int(category.hours / 168.0 * 100))%")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.7))
                             }
                         }
                     }
                     Spacer()
                 }
-                .padding(.horizontal, 10)  // Reduced from 12 for more space
-                .padding(.bottom, 10)  // Reduced from 12
+                .padding(.horizontal, 12)
+                .padding(.bottom, 12)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
