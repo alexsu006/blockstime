@@ -71,7 +71,7 @@ jobs:
           # 创建 PR 描述
           PR_BODY="## Changes
 
-${COMMITS}
+          ${COMMITS}
 
 ---
 *This PR was automatically created by Claude Code*"
