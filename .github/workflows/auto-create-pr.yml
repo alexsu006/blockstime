@@ -68,21 +68,18 @@ jobs:
           COMMITS=$(cat /tmp/commits.txt)
           FIRST_COMMIT=$(echo "$COMMITS" | head -1 | sed 's/^- //')
 
-          # 创建 PR 描述
-          PR_BODY=$(cat <<EOF
-## Changes
-
-${COMMITS}
-
----
-*This PR was automatically created by Claude Code*
-EOF
-)
+          # 创建 PR 描述文件（避免 YAML heredoc 语法问题）
+          echo "## Changes" > /tmp/pr_body.txt
+          echo "" >> /tmp/pr_body.txt
+          cat /tmp/commits.txt >> /tmp/pr_body.txt
+          echo "" >> /tmp/pr_body.txt
+          echo "---" >> /tmp/pr_body.txt
+          echo "*This PR was automatically created by Claude Code*" >> /tmp/pr_body.txt
 
           # 创建 PR
           gh pr create \
             --title "$FIRST_COMMIT" \
-            --body "$PR_BODY" \
+            --body-file /tmp/pr_body.txt \
             --base "$BASE_BRANCH" \
             --head "$BRANCH_NAME"
 
