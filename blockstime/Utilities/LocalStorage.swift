@@ -46,41 +46,62 @@ class LocalStorage {
         lastError = nil
 
         print("💾 Saving \(categories.count) categories to shared storage...")
+        print("   App Group ID: \(Constants.appGroupId)")
+        print("   Storage Key: \(Constants.storageKey)")
 
-        guard sharedDefaults != nil else {
+        guard let defaults = sharedDefaults else {
             lastError = .noUserDefaults
-            print("❌ Error: \(StorageError.noUserDefaults.errorDescription ?? "Unknown error")")
+            print("❌ Main App: Failed to access shared UserDefaults for app group '\(Constants.appGroupId)'")
+            print("⚠️ Main App: This usually means:")
+            print("   1. App Group is not enabled in Xcode project settings")
+            print("   2. App Group is not configured in Apple Developer account")
             return
         }
+
+        print("✅ Main App: Successfully accessed shared UserDefaults")
 
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted // Better debugging
             let data = try encoder.encode(categories)
 
+            print("📦 Main App: Encoded data size: \(data.count) bytes")
+
             // Save to shared UserDefaults for widget access
-            sharedDefaults?.set(data, forKey: Constants.storageKey)
+            defaults.set(data, forKey: Constants.storageKey)
+            print("💾 Main App: Data saved to key '\(Constants.storageKey)'")
 
             // Force synchronize to ensure data is written immediately
-            let success = sharedDefaults?.synchronize() ?? false
+            let success = defaults.synchronize()
             if success {
-                print("✅ Data synchronized to shared storage successfully")
+                print("✅ Main App: Data synchronized to shared storage successfully")
             } else {
-                print("⚠️ Warning: UserDefaults synchronize returned false")
+                print("⚠️ Main App: UserDefaults synchronize returned false")
             }
+
+            // Verify the data was saved
+            if let verifyData = defaults.data(forKey: Constants.storageKey) {
+                print("✅ Main App: Verified data exists (\(verifyData.count) bytes)")
+            } else {
+                print("❌ Main App: Failed to verify saved data!")
+            }
+
+            // List all keys in shared storage for debugging
+            let allKeys = Array(defaults.dictionaryRepresentation().keys)
+            print("📋 Main App: All keys in shared storage: \(allKeys.joined(separator: ", "))")
 
             // Refresh widgets after saving data - ensure it runs on main thread
             #if canImport(WidgetKit)
             if #available(iOS 14.0, macOS 11.0, *) {
                 DispatchQueue.main.async {
-                    print("🔄 Triggering widget reload...")
+                    print("🔄 Main App: Triggering widget reload...")
                     WidgetCenter.shared.reloadAllTimelines()
-                    print("✅ Widget reload triggered - widgets should update immediately")
+                    print("✅ Main App: Widget reload triggered - widgets should update immediately")
                 }
             }
             #endif
 
-            print("✅ Successfully saved \(categories.count) categories")
+            print("✅ Main App: Successfully saved \(categories.count) categories")
 
             // Print category details for debugging
             for category in categories where category.hours > 0 {
@@ -88,7 +109,7 @@ class LocalStorage {
             }
         } catch {
             lastError = .encodingFailed(error)
-            print("❌ Failed to save categories: \(error.localizedDescription)")
+            print("❌ Main App: Failed to save categories: \(error.localizedDescription)")
         }
     }
 

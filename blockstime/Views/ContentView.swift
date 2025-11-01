@@ -6,10 +6,15 @@
 //
 
 import SwiftUI
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 struct ContentView: View {
     @StateObject private var viewModel = CategoryViewModel()
     @State private var selectedTab = 0
+    @State private var showingRefreshAnimation = false
+    @State private var showingDiagnostics = false
 
     var body: some View {
         ZStack {
@@ -139,7 +144,73 @@ struct ContentView: View {
                         endPoint: .trailing
                     )
                 )
+
+            Spacer()
+
+            // Diagnostics button
+            Button(action: {
+                showingDiagnostics.toggle()
+            }) {
+                Image(systemName: "stethoscope")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(8)
+                    .background(
+                        Circle()
+                            .fill(Color(hex: "#333333"))
+                    )
+            }
+            .buttonStyle(PlainButtonStyle())
+            .help("Widget 診斷")
+            .popover(isPresented: $showingDiagnostics) {
+                DiagnosticsView()
+                    .frame(width: 600, height: 500)
+            }
+
+            // Manual widget refresh button
+            Button(action: {
+                refreshWidget()
+            }) {
+                Image(systemName: "arrow.clockwise")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(8)
+                    .background(
+                        Circle()
+                            .fill(Color(hex: "#333333"))
+                    )
+                    .rotationEffect(.degrees(showingRefreshAnimation ? 360 : 0))
+            }
+            .buttonStyle(PlainButtonStyle())
+            .help("手動刷新 Widget")
         }
+        .padding(.horizontal, 20)
+    }
+
+    private func refreshWidget() {
+        print("🔄 手動刷新 Widget...")
+
+        // Trigger rotation animation
+        withAnimation(.linear(duration: 0.5)) {
+            showingRefreshAnimation = true
+        }
+
+        // Force save current categories
+        viewModel.saveCategories()
+
+        #if canImport(WidgetKit)
+        if #available(iOS 14.0, macOS 11.0, *) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                WidgetCenter.shared.reloadAllTimelines()
+                print("✅ Widget 刷新請求已發送")
+
+                // Reset animation after a delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    showingRefreshAnimation = false
+                }
+            }
+        }
+        #endif
     }
 
     private var rightPanel: some View {
