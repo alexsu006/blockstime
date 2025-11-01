@@ -99,6 +99,7 @@ class WidgetDataProvider {
 
     func loadCategories() -> [WidgetCategory] {
         guard let data = sharedDefaults?.data(forKey: storageKey) else {
+            print("⚠️ Widget: No saved data found, using defaults")
             return defaultCategories()
         }
 
@@ -106,10 +107,12 @@ class WidgetDataProvider {
             let decoder = JSONDecoder()
             // Try to decode as WidgetCategory first
             if let categories = try? decoder.decode([WidgetCategory].self, from: data) {
+                print("✅ Widget: Successfully loaded \(categories.count) categories from shared storage")
                 return categories
             }
 
             // Fallback to a generic dictionary approach for compatibility
+            print("⚠️ Widget: Failed to decode, using default categories")
             return defaultCategories()
         }
     }
@@ -138,12 +141,15 @@ struct Provider: TimelineProvider {
         let currentDate = Date()
         let categories = WidgetDataProvider.shared.loadCategories()
 
-        // Update every 15 minutes
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: currentDate)!
+        // Create entry with current data
         let entry = BlocksEntry(date: currentDate, categories: categories)
 
-        let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
+        // Use .atEnd policy for immediate updates when reloadAllTimelines() is called
+        // This ensures the widget updates as soon as the app saves new data
+        let timeline = Timeline(entries: [entry], policy: .atEnd)
         completion(timeline)
+
+        print("📱 Widget timeline updated at \(currentDate) with \(categories.count) categories")
     }
 }
 
