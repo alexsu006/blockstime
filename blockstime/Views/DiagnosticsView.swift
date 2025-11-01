@@ -42,55 +42,57 @@ struct DiagnosticsView: View {
                 .background(Color.gray.opacity(0.3))
 
             // Action buttons
-            HStack {
-                Button(action: {
-                    runDiagnostics()
-                }) {
-                    HStack {
-                        Image(systemName: "arrow.clockwise")
-                        Text("重新檢查")
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                }
-                .buttonStyle(PlainButtonStyle())
-
-                Button(action: {
-                    forceSaveData()
-                }) {
-                    HStack {
-                        Image(systemName: "square.and.arrow.down")
-                        Text("強制保存數據")
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                }
-                .buttonStyle(PlainButtonStyle())
-
-                #if canImport(WidgetKit)
-                if #available(iOS 14.0, macOS 11.0, *) {
+            VStack(spacing: 12) {
+                HStack {
                     Button(action: {
-                        reloadWidgets()
+                        runDiagnostics()
                     }) {
                         HStack {
-                            Image(systemName: "app.badge")
-                            Text("刷新 Widget")
+                            Image(systemName: "arrow.clockwise")
+                            Text("重新檢查")
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        .background(Color.purple)
+                        .background(Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(8)
                     }
                     .buttonStyle(PlainButtonStyle())
+
+                    Button(action: {
+                        forceSyncCurrentData()
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                            Text("同步當前數據到 Widget")
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.orange)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+
+                    #if canImport(WidgetKit)
+                    if #available(iOS 14.0, macOS 11.0, *) {
+                        Button(action: {
+                            reloadWidgets()
+                        }) {
+                            HStack {
+                                Image(systemName: "app.badge")
+                                Text("刷新 Widget")
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.purple)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    #endif
                 }
-                #endif
             }
         }
         .padding(20)
@@ -152,8 +154,18 @@ struct DiagnosticsView: View {
                     info += "  ✅ 數據解碼成功 (\(categories.count) 個分類)\n"
                     info += "\n📊 分類詳情:\n"
                     for category in categories {
-                        info += "  - \(category.name): \(category.hours)h (color: \(category.colorId))\n"
+                        let status = category.hours > 0 ? "✅ 會在 Widget 顯示" : "⚠️ 不會顯示 (0 小時)"
+                        info += "  - \(category.name): \(category.hours)h (color: \(category.colorId)) [\(status)]\n"
                     }
+
+                    let visibleCount = categories.filter({ $0.hours > 0 }).count
+                    info += "\n👁️ Widget 顯示狀態: \(visibleCount)/\(categories.count) 個分類會被顯示\n"
+
+                    if visibleCount < categories.count {
+                        let hiddenCount = categories.count - visibleCount
+                        info += "⚠️ 有 \(hiddenCount) 個分類因為小時數為 0 而不會在 Widget 顯示\n"
+                    }
+
                     isHealthy = true
                 } catch {
                     info += "  ❌ 數據解碼失敗: \(error.localizedDescription)\n"
@@ -179,18 +191,27 @@ struct DiagnosticsView: View {
         diagnosticInfo = info
     }
 
-    private func forceSaveData() {
-        print("💾 強制保存測試數據...")
-        let testCategories = [
-            Category(name: "睡眠", hours: 56, colorId: "red"),
-            Category(name: "工作", hours: 40, colorId: "orange"),
-            Category(name: "自由", hours: 72, colorId: "green")
-        ]
-        LocalStorage.shared.saveCategories(testCategories)
-        print("✅ 測試數據已保存")
+    private func forceSyncCurrentData() {
+        print("🔄 同步當前數據到 Widget...")
+
+        // Load current categories from storage
+        let currentCategories = LocalStorage.shared.loadCategories()
+        print("📥 讀取到 \(currentCategories.count) 個分類")
+
+        // Force save to shared storage
+        LocalStorage.shared.saveCategories(currentCategories)
+        print("💾 數據已強制保存到共享存儲")
+
+        // Reload widgets
+        #if canImport(WidgetKit)
+        if #available(iOS 14.0, macOS 11.0, *) {
+            WidgetCenter.shared.reloadAllTimelines()
+            print("🔄 Widget 已觸發刷新")
+        }
+        #endif
 
         // Refresh diagnostics after a short delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             runDiagnostics()
         }
     }

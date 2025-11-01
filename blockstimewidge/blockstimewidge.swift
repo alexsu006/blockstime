@@ -134,10 +134,15 @@ class WidgetDataProvider {
             let categories = try decoder.decode([Category].self, from: data)
             print("✅ Widget: Successfully decoded \(categories.count) categories")
 
-            // Log loaded categories for debugging
-            for category in categories where category.hours > 0 {
-                print("   - \(category.name): \(category.hours)h (color: \(category.colorId))")
+            // Log ALL categories for debugging (including those with 0 hours)
+            print("📊 Widget: All decoded categories:")
+            for category in categories {
+                let status = category.hours > 0 ? "✅ Will display" : "⚠️ Filtered (0 hours)"
+                print("   - \(category.name): \(category.hours)h (color: \(category.colorId)) [\(status)]")
             }
+
+            let visibleCount = categories.filter({ $0.hours > 0 }).count
+            print("👁️ Widget: Will display \(visibleCount) out of \(categories.count) categories")
 
             return categories
         } catch {
