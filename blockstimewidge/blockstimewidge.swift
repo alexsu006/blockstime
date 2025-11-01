@@ -99,15 +99,40 @@ class WidgetDataProvider {
     }
 
     func loadCategories() -> [Category] {
-        guard let data = sharedDefaults?.data(forKey: storageKey) else {
-            print("⚠️ Widget: No saved data found, using defaults")
+        // Enhanced diagnostic logging
+        print("🔍 Widget: Attempting to load categories...")
+        print("   App Group ID: \(appGroupId)")
+        print("   Storage Key: \(storageKey)")
+
+        // Check if sharedDefaults is accessible
+        guard let defaults = sharedDefaults else {
+            print("❌ Widget: Failed to access shared UserDefaults for app group '\(appGroupId)'")
+            print("⚠️ Widget: This usually means:")
+            print("   1. App Group is not enabled in Xcode project settings")
+            print("   2. App Group ID doesn't match between main app and widget")
+            print("   3. App Group is not configured in Apple Developer account")
             return defaultCategories()
         }
+
+        print("✅ Widget: Successfully accessed shared UserDefaults")
+
+        // Try to get all keys to see what's available
+        if let allKeys = defaults.dictionaryRepresentation().keys as? [String] {
+            print("📋 Widget: Available keys in shared storage: \(allKeys.joined(separator: ", "))")
+        }
+
+        guard let data = defaults.data(forKey: storageKey) else {
+            print("⚠️ Widget: No data found for key '\(storageKey)'")
+            print("   Main app may not have saved data yet, or using different key")
+            return defaultCategories()
+        }
+
+        print("✅ Widget: Found data for key '\(storageKey)' (\(data.count) bytes)")
 
         do {
             let decoder = JSONDecoder()
             let categories = try decoder.decode([Category].self, from: data)
-            print("✅ Widget: Successfully loaded \(categories.count) categories from shared storage")
+            print("✅ Widget: Successfully decoded \(categories.count) categories")
 
             // Log loaded categories for debugging
             for category in categories where category.hours > 0 {
@@ -117,7 +142,7 @@ class WidgetDataProvider {
             return categories
         } catch {
             print("❌ Widget: Failed to decode categories: \(error.localizedDescription)")
-            print("⚠️ Widget: Using default categories")
+            print("   Data may be corrupted or in wrong format")
             return defaultCategories()
         }
     }
