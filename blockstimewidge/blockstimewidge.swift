@@ -275,28 +275,33 @@ struct SmallWidgetView: View {
             return (7, 7, 10, 2)
         }
 
-        let headerHeight: CGFloat = 28  // Compact header
-        let legendHeight: CGFloat = 52  // Space for improved legend
-        let padding: CGFloat = 14
-        let availableWidth = width - padding
-        let availableHeight = height - headerHeight - legendHeight - padding
+        let headerHeight: CGFloat = 32  // Slightly increased for better spacing
+        let legendHeight: CGFloat = 56  // Space for improved legend
+        let horizontalPadding: CGFloat = 20
+        let verticalPadding: CGFloat = 16
+        let availableWidth = max(0, width - horizontalPadding)
+        let availableHeight = max(0, height - headerHeight - legendHeight - verticalPadding)
 
         var bestColumns = 7
         var bestRows = 24
-        var bestBlockSize: CGFloat = 6
-        var bestSpacing: CGFloat = 1.2
+        var bestBlockSize: CGFloat = 5
+        var bestSpacing: CGFloat = 1.0
 
         // Try different column counts to find optimal layout
         for cols in stride(from: 14, through: 7, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 1.2
+            let spacing: CGFloat = 1.0
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
 
             let blockSize = min(widthBasedSize, heightBasedSize)
 
-            if blockSize >= 5 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
+            // Verify the layout fits
+            let totalWidthNeeded = CGFloat(cols) * blockSize + CGFloat(cols - 1) * spacing
+            let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
+
+            if blockSize >= 4.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -315,55 +320,59 @@ struct SmallWidgetView: View {
             let blockSize = layout.blockSize
             let spacing = layout.spacing
 
-            VStack(spacing: 6) {
+            VStack(spacing: 5) {
                 // Compact header with 168h badge
                 HStack(alignment: .center, spacing: 6) {
                     Text("週時間")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: 11, weight: .bold))
                         .foregroundColor(.white)
 
                     HStack(spacing: 3) {
                         Image(systemName: "clock.fill")
-                            .font(.system(size: 8))
+                            .font(.system(size: 7))
                             .foregroundColor(.white.opacity(0.8))
                         Text("168h")
-                            .font(.system(size: 10, weight: .bold))
+                            .font(.system(size: 9, weight: .bold))
                             .foregroundColor(.white)
                     }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
                     .background(
-                        RoundedRectangle(cornerRadius: 5)
+                        RoundedRectangle(cornerRadius: 4)
                             .fill(Color.white.opacity(0.15))
                     )
 
-                    Spacer()
+                    Spacer(minLength: 0)
                 }
                 .padding(.horizontal, 10)
                 .padding(.top, 8)
 
-                // Blocks Grid
-                LazyVGrid(
-                    columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
-                    spacing: spacing
-                ) {
-                    ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
-                        WidgetLegoBlock(
-                            number: nil,
-                            color: block.category.color,
-                            size: blockSize,
-                            showNumber: false
-                        )
+                // Blocks Grid - centered and properly constrained
+                HStack {
+                    Spacer(minLength: 0)
+                    LazyVGrid(
+                        columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
+                        spacing: spacing
+                    ) {
+                        ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
+                            WidgetLegoBlock(
+                                number: nil,
+                                color: block.category.color,
+                                size: blockSize,
+                                showNumber: false
+                            )
+                        }
                     }
+                    Spacer(minLength: 0)
                 }
-                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
 
                 // Enhanced legend - show top 2 categories with stats
-                VStack(spacing: 4) {
+                VStack(spacing: 3) {
                     ForEach(topCategories, id: \.id) { category in
-                        HStack(spacing: 5) {
+                        HStack(spacing: 4) {
                             // Color indicator
-                            RoundedRectangle(cornerRadius: 3)
+                            RoundedRectangle(cornerRadius: 2.5)
                                 .fill(
                                     LinearGradient(
                                         gradient: Gradient(colors: [
@@ -374,35 +383,36 @@ struct SmallWidgetView: View {
                                         endPoint: .bottomTrailing
                                     )
                                 )
-                                .frame(width: 10, height: 10)
+                                .frame(width: 9, height: 9)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 3)
-                                        .stroke(category.color.darkColor.opacity(0.3), lineWidth: 0.8)
+                                    RoundedRectangle(cornerRadius: 2.5)
+                                        .stroke(category.color.darkColor.opacity(0.3), lineWidth: 0.7)
                                 )
 
                             Text(category.name)
-                                .font(.system(size: 9, weight: .semibold))
+                                .font(.system(size: 8.5, weight: .semibold))
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineLimit(1)
 
-                            Spacer()
+                            Spacer(minLength: 0)
 
-                            HStack(spacing: 3) {
+                            HStack(spacing: 2) {
                                 Text("\(Int(category.hours))h")
-                                    .font(.system(size: 9, weight: .bold))
+                                    .font(.system(size: 8.5, weight: .bold))
                                     .foregroundColor(.white)
 
                                 Text("\(Int(category.hours / 168.0 * 100))%")
-                                    .font(.system(size: 8, weight: .medium))
+                                    .font(.system(size: 7.5, weight: .medium))
                                     .foregroundColor(.white.opacity(0.6))
                             }
                         }
+                        .padding(.vertical, 1)
                     }
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 5)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: 6)
                         .fill(Color.white.opacity(0.05))
                 )
                 .padding(.horizontal, 10)
@@ -434,28 +444,33 @@ struct MediumWidgetView: View {
             return (14, 12, 12, 2)
         }
 
-        let legendWidth: CGFloat = 72  // Optimized legend width
-        let titleHeight: CGFloat = 30  // Slightly increased for better header
-        let padding: CGFloat = 16
-        let availableWidth = width - legendWidth - padding
-        let availableHeight = height - titleHeight - padding
+        let legendWidth: CGFloat = 75  // Optimized legend width with more padding
+        let titleHeight: CGFloat = 32  // Slightly increased for better header spacing
+        let horizontalPadding: CGFloat = 24
+        let verticalPadding: CGFloat = 20
+        let availableWidth = max(0, width - legendWidth - horizontalPadding)
+        let availableHeight = max(0, height - titleHeight - verticalPadding)
 
         var bestColumns = 14
         var bestRows = 12
-        var bestBlockSize: CGFloat = 8
-        var bestSpacing: CGFloat = 2.0
+        var bestBlockSize: CGFloat = 7
+        var bestSpacing: CGFloat = 1.8
 
         // Try different column counts to find optimal layout
         for cols in stride(from: 21, through: 12, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 2.0
+            let spacing: CGFloat = 1.8
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
 
             let blockSize = min(widthBasedSize, heightBasedSize)
 
-            if blockSize >= 7 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
+            // Verify the layout fits
+            let totalWidthNeeded = CGFloat(cols) * blockSize + CGFloat(cols - 1) * spacing
+            let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
+
+            if blockSize >= 6.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -474,94 +489,98 @@ struct MediumWidgetView: View {
             let blockSize = layout.blockSize
             let spacing = layout.spacing
 
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 // Blocks Grid Section
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 5) {
                     // Unified header
-                    HStack(alignment: .center, spacing: 6) {
+                    HStack(alignment: .center, spacing: 5) {
                         Text("週時間")
-                            .font(.system(size: 13, weight: .bold))
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundColor(.white)
 
                         Text("168h")
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(.system(size: 10, weight: .semibold))
                             .foregroundColor(.white.opacity(0.7))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 3)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
                             .background(
-                                RoundedRectangle(cornerRadius: 5)
+                                RoundedRectangle(cornerRadius: 4)
                                     .fill(Color.white.opacity(0.12))
                             )
 
-                        Spacer()
+                        Spacer(minLength: 0)
                     }
 
-                    // Blocks Grid
-                    LazyVGrid(
-                        columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
-                        spacing: spacing
-                    ) {
-                        ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
-                            WidgetLegoBlock(
-                                number: nil,
-                                color: block.category.color,
-                                size: blockSize,
-                                showNumber: false
-                            )
+                    // Blocks Grid - centered horizontally
+                    HStack {
+                        Spacer(minLength: 0)
+                        LazyVGrid(
+                            columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
+                            spacing: spacing
+                        ) {
+                            ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
+                                WidgetLegoBlock(
+                                    number: nil,
+                                    color: block.category.color,
+                                    size: blockSize,
+                                    showNumber: false
+                                )
+                            }
                         }
+                        Spacer(minLength: 0)
                     }
                 }
                 .padding(.leading, 12)
                 .padding(.vertical, 10)
 
                 // Compact Legend with better visual hierarchy
-                VStack(alignment: .leading, spacing: 10) {
-                    ForEach(categories.filter({ $0.hours > 0 }), id: \.id) { category in
-                        VStack(alignment: .leading, spacing: 3) {
-                            // Category name with color indicator
-                            HStack(spacing: 5) {
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(
-                                        LinearGradient(
-                                            gradient: Gradient(colors: [
-                                                category.color.lightColor,
-                                                category.color.mainColor,
-                                                category.color.darkColor
-                                            ]),
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(categories.filter({ $0.hours > 0 }), id: \.id) { category in
+                            VStack(alignment: .leading, spacing: 2) {
+                                // Category name with color indicator
+                                HStack(spacing: 4) {
+                                    RoundedRectangle(cornerRadius: 3)
+                                        .fill(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [
+                                                    category.color.lightColor,
+                                                    category.color.mainColor,
+                                                    category.color.darkColor
+                                                ]),
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
                                         )
-                                    )
-                                    .frame(width: 14, height: 14)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .stroke(category.color.darkColor.opacity(0.3), lineWidth: 1)
-                                    )
+                                        .frame(width: 12, height: 12)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 3)
+                                                .stroke(category.color.darkColor.opacity(0.3), lineWidth: 0.8)
+                                        )
 
-                                Text(category.name)
-                                    .font(.system(size: 11, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
+                                    Text(category.name)
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .lineLimit(1)
+                                }
+
+                                // Time and percentage on same line
+                                HStack(spacing: 3) {
+                                    Text("\(Int(category.hours))h")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(.white.opacity(0.9))
+
+                                    Text("(\(Int(category.hours / 168.0 * 100))%)")
+                                        .font(.system(size: 9, weight: .medium))
+                                        .foregroundColor(.white.opacity(0.6))
+                                }
                             }
-
-                            // Time and percentage on same line
-                            HStack(spacing: 4) {
-                                Text("\(Int(category.hours))h")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(.white.opacity(0.9))
-
-                                Text("(\(Int(category.hours / 168.0 * 100))%)")
-                                    .font(.system(size: 10, weight: .medium))
-                                    .foregroundColor(.white.opacity(0.6))
-                            }
+                            .padding(.vertical, 1)
                         }
-                        .padding(.vertical, 2)
                     }
-
-                    Spacer()
                 }
-                .frame(width: 66)
-                .padding(.trailing, 10)
+                .frame(width: 68)
+                .padding(.trailing, 8)
                 .padding(.vertical, 10)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -591,29 +610,33 @@ struct LargeWidgetView: View {
         }
 
         // Optimized spacing to maximize block display area
-        let headerHeight: CGFloat = 36  // Compact header
-        let legendHeight: CGFloat = 60  // Moved legend below header, needs more space
-        let horizontalPadding: CGFloat = 20
-        let verticalPadding: CGFloat = 12
-        let availableWidth = width - horizontalPadding
-        let availableHeight = height - headerHeight - legendHeight - verticalPadding
+        let headerHeight: CGFloat = 40  // Compact header with adequate spacing
+        let legendHeight: CGFloat = 65  // Moved legend below header, needs more space
+        let horizontalPadding: CGFloat = 28
+        let verticalPadding: CGFloat = 20
+        let availableWidth = max(0, width - horizontalPadding)
+        let availableHeight = max(0, height - headerHeight - legendHeight - verticalPadding)
 
         var bestColumns = 14
         var bestRows = 12
-        var bestBlockSize: CGFloat = 20
-        var bestSpacing: CGFloat = 2.5
+        var bestBlockSize: CGFloat = 13
+        var bestSpacing: CGFloat = 2.0
 
         // Try different column counts to find optimal layout
         for cols in stride(from: 24, through: 14, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 2.5
+            let spacing: CGFloat = 2.0
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
 
             let blockSize = min(widthBasedSize, heightBasedSize)
 
-            if blockSize >= 13 && blockSize * CGFloat(rows) + spacing * CGFloat(rows - 1) <= availableHeight {
+            // Verify the layout fits
+            let totalWidthNeeded = CGFloat(cols) * blockSize + CGFloat(cols - 1) * spacing
+            let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
+
+            if blockSize >= 12 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -632,99 +655,104 @@ struct LargeWidgetView: View {
             let blockSize = layout.blockSize
             let spacing = layout.spacing
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 // Compact Header with 168h badge
-                HStack(alignment: .center, spacing: 10) {
+                HStack(alignment: .center, spacing: 8) {
                     Text("週時間規劃")
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
 
                     // Prominent 168h badge
-                    HStack(spacing: 4) {
+                    HStack(spacing: 3) {
                         Image(systemName: "clock.fill")
-                            .font(.system(size: 11))
+                            .font(.system(size: 10))
                             .foregroundColor(.white.opacity(0.9))
                         Text("168h")
-                            .font(.system(size: 13, weight: .bold))
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundColor(.white)
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
                     .background(
-                        RoundedRectangle(cornerRadius: 8)
+                        RoundedRectangle(cornerRadius: 6)
                             .fill(Color.white.opacity(0.15))
                     )
 
-                    Spacer()
+                    Spacer(minLength: 0)
                 }
                 .padding(.horizontal, 14)
                 .padding(.top, 10)
 
-                // Categories Legend - Moved to top for better context
-                HStack(spacing: 14) {
-                    ForEach(categories.filter({ $0.hours > 0 }), id: \.id) { category in
-                        HStack(spacing: 6) {
-                            // Larger, more prominent color indicator
-                            RoundedRectangle(cornerRadius: 5)
-                                .fill(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [
-                                            category.color.lightColor,
-                                            category.color.mainColor,
-                                            category.color.darkColor
-                                        ]),
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
+                // Categories Legend - Scrollable if too many categories
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(categories.filter({ $0.hours > 0 }), id: \.id) { category in
+                            HStack(spacing: 5) {
+                                // Larger, more prominent color indicator
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                category.color.lightColor,
+                                                category.color.mainColor,
+                                                category.color.darkColor
+                                            ]),
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
                                     )
-                                )
-                                .frame(width: 22, height: 22)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 5)
-                                        .stroke(category.color.darkColor.opacity(0.4), lineWidth: 1.5)
-                                )
-                                .shadow(color: category.color.glowColor.opacity(0.3), radius: 2, x: 0, y: 1)
+                                    .frame(width: 18, height: 18)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .stroke(category.color.darkColor.opacity(0.4), lineWidth: 1.2)
+                                    )
+                                    .shadow(color: category.color.glowColor.opacity(0.2), radius: 1.5, x: 0, y: 1)
 
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(category.name)
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(category.name)
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .lineLimit(1)
 
-                                HStack(spacing: 4) {
-                                    Text("\(Int(category.hours))h")
-                                        .font(.system(size: 12, weight: .semibold))
-                                        .foregroundColor(.white.opacity(0.85))
+                                    HStack(spacing: 3) {
+                                        Text("\(Int(category.hours))h")
+                                            .font(.system(size: 11, weight: .semibold))
+                                            .foregroundColor(.white.opacity(0.85))
 
-                                    Text("(\(Int(category.hours / 168.0 * 100))%)")
-                                        .font(.system(size: 11, weight: .medium))
-                                        .foregroundColor(.white.opacity(0.6))
+                                        Text("(\(Int(category.hours / 168.0 * 100))%)")
+                                            .font(.system(size: 10, weight: .medium))
+                                            .foregroundColor(.white.opacity(0.6))
+                                    }
                                 }
                             }
                         }
                     }
-                    Spacer()
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
                 .background(
-                    RoundedRectangle(cornerRadius: 10)
+                    RoundedRectangle(cornerRadius: 8)
                         .fill(Color.white.opacity(0.05))
                 )
                 .padding(.horizontal, 14)
 
-                // Blocks Grid
-                LazyVGrid(
-                    columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
-                    spacing: spacing
-                ) {
-                    ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
-                        WidgetLegoBlock(
-                            number: nil,
-                            color: block.category.color,
-                            size: blockSize,
-                            showNumber: false
-                        )
+                // Blocks Grid - centered and properly constrained
+                HStack {
+                    Spacer(minLength: 0)
+                    LazyVGrid(
+                        columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
+                        spacing: spacing
+                    ) {
+                        ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
+                            WidgetLegoBlock(
+                                number: nil,
+                                color: block.category.color,
+                                size: blockSize,
+                                showNumber: false
+                            )
+                        }
                     }
+                    Spacer(minLength: 0)
                 }
                 .padding(.horizontal, 14)
                 .padding(.bottom, 10)

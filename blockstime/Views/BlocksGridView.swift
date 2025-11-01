@@ -41,21 +41,24 @@ struct BlocksGridView: View {
         return blocks
     }
 
-    // 計算最佳的列數和積木大小
+    // 計算最佳的列數和積木大小 - 優化版本，確保所有積木都能完整顯示
     private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, blockSize: CGFloat) {
         let totalBlocks = allBlocks.count
         guard totalBlocks > 0 else {
             return (Constants.defaultLayoutColumns, Constants.blockSize)
         }
 
-        let padding: CGFloat = 30
-        let availableWidth = width - padding
-        let availableHeight = height - padding
+        // 更精確的 padding 計算
+        let horizontalPadding: CGFloat = 30
+        let verticalPadding: CGFloat = 30
+        let availableWidth = max(0, width - horizontalPadding)
+        let availableHeight = max(0, height - verticalPadding)
 
         // 嘗試不同的列數，找到最適合的佈局
         var bestColumns = Constants.defaultLayoutColumns
-        var bestBlockSize: CGFloat = Constants.blockSize
+        var bestBlockSize: CGFloat = Constants.minBlockSize
 
+        // 從最大列數開始嘗試，找到第一個能容納所有積木的佈局
         for cols in stride(from: Constants.maxLayoutColumns, through: Constants.minLayoutColumns, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
 
@@ -68,11 +71,17 @@ struct BlocksGridView: View {
             // 使用較小的尺寸以確保兩個方向都能放得下
             let blockSize = min(widthBasedSize, heightBasedSize)
 
-            // 如果積木大小合理，就使用這個佈局
+            // 檢查這個佈局是否合理
             if blockSize >= Constants.minBlockSize && blockSize <= Constants.maxBlockSize {
-                bestColumns = cols
-                bestBlockSize = blockSize
-                break
+                // 驗證所有積木都能放入可用空間
+                let totalWidth = CGFloat(cols) * blockSize + CGFloat(cols - 1) * Constants.blockGap
+                let totalHeight = CGFloat(rows) * blockSize + CGFloat(rows - 1) * Constants.blockGap
+
+                if totalWidth <= availableWidth && totalHeight <= availableHeight {
+                    bestColumns = cols
+                    bestBlockSize = blockSize
+                    break
+                }
             }
         }
 
@@ -85,8 +94,8 @@ struct BlocksGridView: View {
             let columns = layout.columns
             let blockSize = layout.blockSize
 
-            VStack {
-                Spacer()
+            // 使用 ScrollView 確保當積木過多時也能滾動查看
+            ScrollView([.vertical, .horizontal], showsIndicators: false) {
                 LazyVGrid(
                     columns: Array(repeating: GridItem(.fixed(blockSize), spacing: Constants.blockGap), count: columns),
                     spacing: Constants.blockGap
@@ -95,10 +104,9 @@ struct BlocksGridView: View {
                         LegoBlock(number: block.blockIndex + 1, color: block.category.color, size: blockSize)
                     }
                 }
-                Spacer()
+                .padding(15)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(15)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
         .background(Color.black.opacity(0.2))
         .cornerRadius(10)
