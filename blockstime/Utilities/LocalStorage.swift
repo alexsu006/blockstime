@@ -45,6 +45,8 @@ class LocalStorage {
     func saveCategories(_ categories: [Category]) {
         lastError = nil
 
+        print("💾 Saving \(categories.count) categories to shared storage...")
+
         guard sharedDefaults != nil else {
             lastError = .noUserDefaults
             print("❌ Error: \(StorageError.noUserDefaults.errorDescription ?? "Unknown error")")
@@ -61,7 +63,9 @@ class LocalStorage {
 
             // Force synchronize to ensure data is written immediately
             let success = sharedDefaults?.synchronize() ?? false
-            if !success {
+            if success {
+                print("✅ Data synchronized to shared storage successfully")
+            } else {
                 print("⚠️ Warning: UserDefaults synchronize returned false")
             }
 
@@ -69,13 +73,19 @@ class LocalStorage {
             #if canImport(WidgetKit)
             if #available(iOS 14.0, macOS 11.0, *) {
                 DispatchQueue.main.async {
+                    print("🔄 Triggering widget reload...")
                     WidgetCenter.shared.reloadAllTimelines()
-                    print("✅ Widget timelines reloaded successfully")
+                    print("✅ Widget reload triggered - widgets should update immediately")
                 }
             }
             #endif
 
             print("✅ Successfully saved \(categories.count) categories")
+
+            // Print category details for debugging
+            for category in categories where category.hours > 0 {
+                print("   - \(category.name): \(category.hours)h (\(category.blocksCount) blocks)")
+            }
         } catch {
             lastError = .encodingFailed(error)
             print("❌ Failed to save categories: \(error.localizedDescription)")
