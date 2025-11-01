@@ -19,17 +19,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # 自动批准 PR
-      - name: Approve Pull Request
-        uses: hmarr/auto-approve-action@v4
-        with:
-          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
-
-      # 等待一下让批准生效
-      - name: Wait for approval to register
-        run: sleep 5
-
-      # 尝试立即合并 PR
+      # 自动合并 PR
       - name: Merge Pull Request
         run: |
           # 先尝试直接合并
@@ -48,4 +38,4 @@ jobs:
       - name: Success message
         run: |
           echo "✅ PR #${{ github.event.pull_request.number }} 处理完成"
-          echo "已自动批准并尝试合并"
+          echo "已自动尝试合并"
