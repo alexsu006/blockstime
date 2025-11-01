@@ -69,12 +69,15 @@ jobs:
           FIRST_COMMIT=$(echo "$COMMITS" | head -1 | sed 's/^- //')
 
           # 创建 PR 描述
-          PR_BODY="## Changes
+          PR_BODY=$(cat <<EOF
+## Changes
 
-          ${COMMITS}
+${COMMITS}
 
 ---
-*This PR was automatically created by Claude Code*"
+*This PR was automatically created by Claude Code*
+EOF
+)
 
           # 创建 PR
           gh pr create \
