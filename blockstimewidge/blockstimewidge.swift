@@ -255,48 +255,30 @@ struct SmallWidgetView: View {
         return blocks
     }
 
-    // Calculate optimal layout for small widget - maximize block size, reduce empty space
+    // Calculate optimal layout for small widget - 12 blocks per row, 14 rows
     private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
         let totalBlocks = allBlocks.count
         guard totalBlocks > 0 else {
-            return (14, 12, 8, 1)
+            return (12, 14, 8, 1)
         }
+
+        // Fixed layout: 12 columns, 14 rows
+        let columns = 12
+        let rows = 14
+        let spacing: CGFloat = 0.5
 
         // Reduce padding to fill more space
         let padding: CGFloat = 2
         let availableWidth = max(0, width - padding * 2)
         let availableHeight = max(0, height - padding * 2)
 
-        var bestColumns = 14
-        var bestRows = 12
-        var bestBlockSize: CGFloat = 4
-        var bestSpacing: CGFloat = 0.3
+        // Calculate block size based on available space
+        let widthBasedSize = (availableWidth - CGFloat(columns - 1) * spacing) / CGFloat(columns)
+        let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
 
-        // Reduce column count to make blocks bigger - start from 20 instead of 28
-        for cols in stride(from: 20, through: 10, by: -1) {
-            let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 0.3  // Tighter spacing for more compact layout
+        let blockSize = min(widthBasedSize, heightBasedSize)
 
-            let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
-            let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
-
-            let blockSize = min(widthBasedSize, heightBasedSize)
-
-            // Verify the layout fits
-            let totalWidthNeeded = CGFloat(cols) * blockSize + CGFloat(cols - 1) * spacing
-            let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
-
-            // Increase minimum block size to make blocks more visible
-            if blockSize >= 12 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
-                bestColumns = cols
-                bestRows = rows
-                bestBlockSize = blockSize
-                bestSpacing = spacing
-                break
-            }
-        }
-
-        return (bestColumns, bestRows, bestBlockSize, bestSpacing)
+        return (columns, rows, blockSize, spacing)
     }
 
     var body: some View {
@@ -356,12 +338,17 @@ struct MediumWidgetView: View {
         return max(total, 1.0) // Prevent division by zero
     }
 
-    // Calculate optimal layout for medium widget - vertical layout with legend at bottom
+    // Calculate optimal layout for medium widget - 24 blocks per row, 7 rows with legend at bottom
     private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
         let totalBlocks = allBlocks.count
         guard totalBlocks > 0 else {
-            return (21, 8, 6, 1)
+            return (24, 7, 6, 1)
         }
+
+        // Fixed layout: 24 columns, 7 rows
+        let columns = 24
+        let rows = 7
+        let spacing: CGFloat = 0.8
 
         // Reserve space for bottom legend (compact horizontal layout)
         let legendHeight: CGFloat = 26  // Compact legend at bottom
@@ -371,36 +358,13 @@ struct MediumWidgetView: View {
         let availableWidth = max(0, width - padding * 2)
         let availableHeight = max(0, height - legendHeight - padding * 2 - sectionSpacing)
 
-        var bestColumns = 21
-        var bestRows = 8
-        var bestBlockSize: CGFloat = 6
-        var bestSpacing: CGFloat = 0.8
+        // Calculate block size based on available space
+        let widthBasedSize = (availableWidth - CGFloat(columns - 1) * spacing) / CGFloat(columns)
+        let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
 
-        // Try different column counts to find optimal layout - maximize block space
-        for cols in stride(from: 32, through: 14, by: -1) {
-            let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 0.8  // Compact spacing
+        let blockSize = min(widthBasedSize, heightBasedSize)
 
-            let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
-            let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
-
-            let blockSize = min(widthBasedSize, heightBasedSize)
-
-            // Verify the layout fits
-            let totalWidthNeeded = CGFloat(cols) * blockSize + CGFloat(cols - 1) * spacing
-            let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
-
-            // Lower minimum to ensure all blocks fit
-            if blockSize >= 6 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
-                bestColumns = cols
-                bestRows = rows
-                bestBlockSize = blockSize
-                bestSpacing = spacing
-                break
-            }
-        }
-
-        return (bestColumns, bestRows, bestBlockSize, bestSpacing)
+        return (columns, rows, blockSize, spacing)
     }
 
     var body: some View {
@@ -507,12 +471,17 @@ struct LargeWidgetView: View {
         return max(total, 1.0) // Prevent division by zero
     }
 
-    // Calculate optimal layout for large widget - maximize block size, fill available space
+    // Calculate optimal layout for large widget - 12 blocks per row, 14 rows
     private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
         let totalBlocks = allBlocks.count
         guard totalBlocks > 0 else {
-            return (21, 8, 15, 2)
+            return (12, 14, 15, 2)
         }
+
+        // Fixed layout: 12 columns, 14 rows
+        let columns = 12
+        let rows = 14
+        let spacing: CGFloat = 1.0
 
         // Reserve space for bottom legend - horizontal scrollable layout
         let legendHeight: CGFloat = 32  // Bottom legend area
@@ -522,37 +491,13 @@ struct LargeWidgetView: View {
         let availableWidth = max(0, width - padding * 2)
         let availableHeight = max(0, height - legendHeight - padding * 2 - sectionSpacing)
 
-        var bestColumns = 21
-        var bestRows = 8
-        var bestBlockSize: CGFloat = 18  // Increased default block size
-        var bestSpacing: CGFloat = 1.0  // Tighter spacing
+        // Calculate block size based on available space
+        let widthBasedSize = (availableWidth - CGFloat(columns - 1) * spacing) / CGFloat(columns)
+        let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
 
-        // Try different column counts to find optimal layout - maximize blocks
-        // Start from 24 instead of 28 to make blocks bigger
-        for cols in stride(from: 24, through: 14, by: -1) {
-            let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 1.0  // Tighter spacing for more block space
+        let blockSize = min(widthBasedSize, heightBasedSize)
 
-            let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
-            let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
-
-            let blockSize = min(widthBasedSize, heightBasedSize)
-
-            // Verify the layout fits
-            let totalWidthNeeded = CGFloat(cols) * blockSize + CGFloat(cols - 1) * spacing
-            let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
-
-            // Increase minimum block size to make blocks more prominent
-            if blockSize >= 18.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
-                bestColumns = cols
-                bestRows = rows
-                bestBlockSize = blockSize
-                bestSpacing = spacing
-                break
-            }
-        }
-
-        return (bestColumns, bestRows, bestBlockSize, bestSpacing)
+        return (columns, rows, blockSize, spacing)
     }
 
     var body: some View {
