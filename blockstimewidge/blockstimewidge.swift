@@ -255,27 +255,27 @@ struct SmallWidgetView: View {
         return blocks
     }
 
-    // Calculate optimal layout for small widget - fits all 168 blocks
+    // Calculate optimal layout for small widget - maximize block size, reduce empty space
     private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
         let totalBlocks = allBlocks.count
         guard totalBlocks > 0 else {
             return (14, 12, 8, 1)
         }
 
-        // Minimal padding to maximize block display area
-        let padding: CGFloat = 4
+        // Reduce padding to fill more space
+        let padding: CGFloat = 2
         let availableWidth = max(0, width - padding * 2)
         let availableHeight = max(0, height - padding * 2)
 
         var bestColumns = 14
         var bestRows = 12
-        var bestBlockSize: CGFloat = 3
-        var bestSpacing: CGFloat = 0.5
+        var bestBlockSize: CGFloat = 4
+        var bestSpacing: CGFloat = 0.3
 
-        // Try different column counts - start from 24 to fit all 168 blocks in small space
-        for cols in stride(from: 28, through: 10, by: -1) {
+        // Reduce column count to make blocks bigger - start from 20 instead of 28
+        for cols in stride(from: 20, through: 10, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 0.5  // Minimal spacing for compact layout
+            let spacing: CGFloat = 0.3  // Tighter spacing for more compact layout
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
@@ -286,8 +286,8 @@ struct SmallWidgetView: View {
             let totalWidthNeeded = CGFloat(cols) * blockSize + CGFloat(cols - 1) * spacing
             let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
 
-            // Lower minimum block size to 2.5 to ensure all blocks fit
-            if blockSize >= 2.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
+            // Increase minimum block size to make blocks more visible
+            if blockSize >= 3.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -323,7 +323,7 @@ struct SmallWidgetView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            .padding(4)
+            .padding(2)
         }
     }
 }
@@ -342,11 +342,11 @@ struct MediumWidgetView: View {
         return blocks
     }
 
-    // Get top 3 categories
+    // Get top 5 categories for medium widget
     private var topCategories: [Category] {
         categories.filter({ $0.hours > 0 })
             .sorted(by: { $0.hours > $1.hours })
-            .prefix(3)
+            .prefix(5)
             .map { $0 }
     }
 
@@ -504,7 +504,7 @@ struct LargeWidgetView: View {
         return max(total, 1.0) // Prevent division by zero
     }
 
-    // Calculate optimal layout for large widget - vertical layout with legend at bottom
+    // Calculate optimal layout for large widget - maximize block size, fill available space
     private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
         let totalBlocks = allBlocks.count
         guard totalBlocks > 0 else {
@@ -513,21 +513,22 @@ struct LargeWidgetView: View {
 
         // Reserve space for bottom legend - horizontal scrollable layout
         let legendHeight: CGFloat = 32  // Bottom legend area
-        let padding: CGFloat = 6
-        let sectionSpacing: CGFloat = 4
+        let padding: CGFloat = 4  // Reduced padding for more space
+        let sectionSpacing: CGFloat = 3  // Reduced spacing
 
         let availableWidth = max(0, width - padding * 2)
         let availableHeight = max(0, height - legendHeight - padding * 2 - sectionSpacing)
 
         var bestColumns = 21
         var bestRows = 8
-        var bestBlockSize: CGFloat = 15
-        var bestSpacing: CGFloat = 1.2
+        var bestBlockSize: CGFloat = 18  // Increased default block size
+        var bestSpacing: CGFloat = 1.0  // Tighter spacing
 
         // Try different column counts to find optimal layout - maximize blocks
-        for cols in stride(from: 28, through: 14, by: -1) {
+        // Start from 24 instead of 28 to make blocks bigger
+        for cols in stride(from: 24, through: 14, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 1.2  // Compact spacing
+            let spacing: CGFloat = 1.0  // Tighter spacing for more block space
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
@@ -538,8 +539,8 @@ struct LargeWidgetView: View {
             let totalWidthNeeded = CGFloat(cols) * blockSize + CGFloat(cols - 1) * spacing
             let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
 
-            // Lower minimum to maximize blocks display
-            if blockSize >= 7.0 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
+            // Increase minimum block size to make blocks more prominent
+            if blockSize >= 8.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -627,9 +628,9 @@ struct LargeWidgetView: View {
                     RoundedRectangle(cornerRadius: 5)
                         .fill(Color.white.opacity(0.05))
                 )
-                .padding(.horizontal, 6)
+                .padding(.horizontal, 4)
             }
-            .padding(6)
+            .padding(4)
         }
     }
 }
