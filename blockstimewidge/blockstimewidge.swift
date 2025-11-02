@@ -287,7 +287,7 @@ struct SmallWidgetView: View {
             let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
 
             // Increase minimum block size to make blocks more visible
-            if blockSize >= 3.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
+            if blockSize >= 6 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -391,7 +391,7 @@ struct MediumWidgetView: View {
             let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
 
             // Lower minimum to ensure all blocks fit
-            if blockSize >= 3.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
+            if blockSize >= 4.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -540,7 +540,7 @@ struct LargeWidgetView: View {
             let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
 
             // Increase minimum block size to make blocks more prominent
-            if blockSize >= 8.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
+            if blockSize >= 18 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
