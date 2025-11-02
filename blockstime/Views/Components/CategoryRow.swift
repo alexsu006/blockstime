@@ -74,7 +74,7 @@ struct CategoryRow: View {
                 .springyButton()
 
                 // Name input
-                TextField("類別名稱", text: .init(
+                TextField("項目名稱", text: .init(
                     get: { category.name },
                     set: { onNameChange($0) }
                 ))
