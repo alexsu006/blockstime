@@ -45,6 +45,7 @@ struct DiagnosticsView: View {
             VStack(spacing: 12) {
                 HStack {
                     Button(action: {
+                        HapticManager.shared.buttonTap()
                         runDiagnostics()
                     }) {
                         HStack {
@@ -57,9 +58,10 @@ struct DiagnosticsView: View {
                         .foregroundColor(.white)
                         .cornerRadius(8)
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .springyButton()
 
                     Button(action: {
+                        HapticManager.shared.buttonTap()
                         forceSyncCurrentData()
                     }) {
                         HStack {
@@ -72,11 +74,12 @@ struct DiagnosticsView: View {
                         .foregroundColor(.white)
                         .cornerRadius(8)
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .springyButton()
 
                     #if canImport(WidgetKit)
                     if #available(iOS 14.0, macOS 11.0, *) {
                         Button(action: {
+                            HapticManager.shared.buttonTap()
                             reloadWidgets()
                         }) {
                             HStack {
@@ -89,23 +92,14 @@ struct DiagnosticsView: View {
                             .foregroundColor(.white)
                             .cornerRadius(8)
                         }
-                        .buttonStyle(PlainButtonStyle())
+                        .springyButton()
                     }
                     #endif
                 }
             }
         }
         .padding(20)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(hex: "#1a1a1a"),
-                    Color(hex: "#0f0f0f")
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        .background(.regularMaterial)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
