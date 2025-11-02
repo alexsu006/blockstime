@@ -193,6 +193,62 @@ struct BlocksEntry: TimelineEntry {
     let categories: [Category]
 }
 
+// MARK: - Flow Layout for Legend
+// A custom layout that wraps items into multiple rows when needed
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 4
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let result = FlowResult(
+            in: proposal.replacingUnspecifiedDimensions().width,
+            subviews: subviews,
+            spacing: spacing
+        )
+        return result.size
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let result = FlowResult(
+            in: bounds.width,
+            subviews: subviews,
+            spacing: spacing
+        )
+        for (index, subview) in subviews.enumerated() {
+            subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x, y: bounds.minY + result.positions[index].y), proposal: .unspecified)
+        }
+    }
+
+    struct FlowResult {
+        var size: CGSize = .zero
+        var positions: [CGPoint] = []
+
+        init(in containerWidth: CGFloat, subviews: Subviews, spacing: CGFloat) {
+            var currentX: CGFloat = 0
+            var currentY: CGFloat = 0
+            var lineHeight: CGFloat = 0
+            var maxWidth: CGFloat = 0
+
+            for subview in subviews {
+                let size = subview.sizeThatFits(.unspecified)
+
+                if currentX + size.width > containerWidth && currentX > 0 {
+                    // Move to next line
+                    currentX = 0
+                    currentY += lineHeight + spacing
+                    lineHeight = 0
+                }
+
+                positions.append(CGPoint(x: currentX, y: currentY))
+                currentX += size.width + spacing
+                lineHeight = max(lineHeight, size.height)
+                maxWidth = max(maxWidth, currentX - spacing)
+            }
+
+            size = CGSize(width: maxWidth, height: currentY + lineHeight)
+        }
+    }
+}
+
 // MARK: - Widget Block View
 struct WidgetLegoBlock: View {
     let number: Int?
@@ -324,12 +380,10 @@ struct MediumWidgetView: View {
         return blocks
     }
 
-    // Get top 5 categories for medium widget
-    private var topCategories: [Category] {
+    // Show all categories with hours > 0 (sorted by hours descending)
+    private var visibleCategories: [Category] {
         categories.filter({ $0.hours > 0 })
             .sorted(by: { $0.hours > $1.hours })
-            .prefix(5)
-            .map { $0 }
     }
 
     // Calculate total hours to avoid division by zero
@@ -338,7 +392,30 @@ struct MediumWidgetView: View {
         return max(total, 1.0) // Prevent division by zero
     }
 
-    // Calculate optimal layout for medium widget - 24 blocks per row, 7 rows with legend at bottom
+    // Estimate legend height based on number of categories
+    private func estimateLegendHeight(width: CGFloat, categoryCount: Int) -> CGFloat {
+        guard categoryCount > 0 else { return 18 }
+
+        // Estimate: Each legend item is approximately 60-80 pixels wide
+        // Legend has 6pt horizontal padding on each side = 12pt total
+        let availableWidth = width - 12
+        let estimatedItemWidth: CGFloat = 70  // Average width per item
+        let itemsPerRow = max(1, Int(availableWidth / estimatedItemWidth))
+        let numberOfRows = max(1, Int(ceil(Double(categoryCount) / Double(itemsPerRow))))
+
+        // Each row: 7pt (color box) + 2pt padding = ~13pt height per row
+        // Add padding: 2pt top + 2pt bottom + spacing between rows
+        let baseRowHeight: CGFloat = 13
+        let verticalPadding: CGFloat = 4
+        let rowSpacing: CGFloat = 2
+
+        let totalHeight = verticalPadding + CGFloat(numberOfRows) * baseRowHeight + CGFloat(max(0, numberOfRows - 1)) * rowSpacing
+
+        // Clamp between 18pt (min, single row) and 50pt (max, ~3 rows)
+        return min(max(totalHeight, 18), 50)
+    }
+
+    // Calculate optimal layout for medium widget - 24 blocks per row, 7 rows with dynamic legend at bottom
     private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
         let totalBlocks = allBlocks.count
         guard totalBlocks > 0 else {
@@ -350,8 +427,8 @@ struct MediumWidgetView: View {
         let rows = 7
         let spacing: CGFloat = 0.8
 
-        // Reserve space for bottom legend (compact horizontal layout)
-        let legendHeight: CGFloat = 18  // Ultra compact legend at bottom
+        // Dynamic legend height based on number of categories
+        let legendHeight = estimateLegendHeight(width: width, categoryCount: visibleCategories.count)
         let padding: CGFloat = 4
         let sectionSpacing: CGFloat = 2
 
@@ -392,9 +469,9 @@ struct MediumWidgetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
 
-                // Bottom Legend - Compact single line layout
-                HStack(spacing: 4) {
-                    ForEach(topCategories, id: \.id) { category in
+                // Bottom Legend - Multi-line flow layout (shows ALL categories)
+                FlowLayout(spacing: 4) {
+                    ForEach(visibleCategories, id: \.id) { category in
                         HStack(spacing: 2) {
                             // Compact color indicator
                             RoundedRectangle(cornerRadius: 1.5)
@@ -423,7 +500,6 @@ struct MediumWidgetView: View {
                                 .truncationMode(.tail)
                         }
                     }
-                    Spacer(minLength: 0)
                 }
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
@@ -452,13 +528,42 @@ struct LargeWidgetView: View {
         return blocks
     }
 
+    // Show all categories with hours > 0 (sorted by hours descending)
+    private var visibleCategories: [Category] {
+        categories.filter({ $0.hours > 0 })
+            .sorted(by: { $0.hours > $1.hours })
+    }
+
     // Calculate total hours to avoid division by zero
     private var totalHours: Double {
         let total = categories.reduce(0.0) { $0 + $1.hours }
         return max(total, 1.0) // Prevent division by zero
     }
 
-    // Calculate optimal layout for large widget - 12 blocks per row, 14 rows
+    // Estimate legend height based on number of categories
+    private func estimateLegendHeight(width: CGFloat, categoryCount: Int) -> CGFloat {
+        guard categoryCount > 0 else { return 26 }
+
+        // Estimate: Each legend item is approximately 80-100 pixels wide (larger than medium)
+        // Legend has 8pt horizontal padding on each side = 16pt total
+        let availableWidth = width - 16
+        let estimatedItemWidth: CGFloat = 90  // Average width per item (larger font, larger color box)
+        let itemsPerRow = max(1, Int(availableWidth / estimatedItemWidth))
+        let numberOfRows = max(1, Int(ceil(Double(categoryCount) / Double(itemsPerRow))))
+
+        // Each row: 12pt (color box) + 4pt padding = ~18pt height per row
+        // Add padding: 4pt top + 4pt bottom + spacing between rows
+        let baseRowHeight: CGFloat = 18
+        let verticalPadding: CGFloat = 8
+        let rowSpacing: CGFloat = 3
+
+        let totalHeight = verticalPadding + CGFloat(numberOfRows) * baseRowHeight + CGFloat(max(0, numberOfRows - 1)) * rowSpacing
+
+        // Clamp between 26pt (min, single row) and 70pt (max, ~3 rows)
+        return min(max(totalHeight, 26), 70)
+    }
+
+    // Calculate optimal layout for large widget - 12 blocks per row, 14 rows with dynamic legend
     private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
         let totalBlocks = allBlocks.count
         guard totalBlocks > 0 else {
@@ -470,10 +575,10 @@ struct LargeWidgetView: View {
         let rows = 14
         let spacing: CGFloat = 1.0
 
-        // Reserve space for bottom legend - yellow bar layout
-        let legendHeight: CGFloat = 26  // Space for yellow legend bar
-        let padding: CGFloat = 4  // Reduced padding for more space
-        let sectionSpacing: CGFloat = 2  // Reduced spacing
+        // Dynamic legend height based on number of categories
+        let legendHeight = estimateLegendHeight(width: width, categoryCount: visibleCategories.count)
+        let padding: CGFloat = 4
+        let sectionSpacing: CGFloat = 2
 
         let availableWidth = max(0, width - padding * 2)
         let availableHeight = max(0, height - legendHeight - padding * 2 - sectionSpacing)
@@ -512,9 +617,9 @@ struct LargeWidgetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
 
-                // Bottom Legend - Yellow bar with category labels
-                HStack(spacing: 8) {
-                    ForEach(categories.filter({ $0.hours > 0 }), id: \.id) { category in
+                // Bottom Legend - Multi-line yellow bar with ALL categories
+                FlowLayout(spacing: 8) {
+                    ForEach(visibleCategories, id: \.id) { category in
                         HStack(spacing: 3) {
                             // Larger color indicator block
                             RoundedRectangle(cornerRadius: 2)
@@ -543,7 +648,6 @@ struct LargeWidgetView: View {
                                 .truncationMode(.tail)
                         }
                     }
-                    Spacer(minLength: 0)
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
