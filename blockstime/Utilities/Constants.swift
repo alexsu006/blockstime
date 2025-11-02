@@ -36,4 +36,12 @@ enum Constants {
 
     // Animation Constants
     static let defaultAnimationDuration: Double = 0.3
+
+    // Spring Animation Parameters (Apple Liquid-style)
+    static let springResponse: Double = 0.5          // 彈簧回應時間
+    static let springDampingFraction: Double = 0.68  // 阻尼係數 (0.68 是 Apple 推薦值)
+    static let springBlendDuration: Double = 0.35    // 混合持續時間
+
+    static let quickSpringResponse: Double = 0.3     // 快速彈簧
+    static let smoothSpringResponse: Double = 0.6    // 平滑彈簧
 }

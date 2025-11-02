@@ -94,7 +94,10 @@ struct ContentView: View {
 
     private func tabButton(title: String, index: Int) -> some View {
         Button(action: {
-            withAnimation(.easeInOut(duration: 0.3)) {
+            HapticManager.shared.tabSwitch()
+            withAnimation(.spring(response: Constants.springResponse,
+                                dampingFraction: Constants.springDampingFraction,
+                                blendDuration: Constants.springBlendDuration)) {
                 selectedTab = index
             }
         }) {
@@ -149,6 +152,7 @@ struct ContentView: View {
 
             // Diagnostics button
             Button(action: {
+                HapticManager.shared.buttonTap()
                 showingDiagnostics.toggle()
             }) {
                 Image(systemName: "stethoscope")
@@ -160,7 +164,7 @@ struct ContentView: View {
                             .fill(Color(hex: "#333333"))
                     )
             }
-            .buttonStyle(PlainButtonStyle())
+            .springyButton(scale: 0.9)
             .help("Widget 診斷")
             .popover(isPresented: $showingDiagnostics) {
                 DiagnosticsView()
@@ -169,6 +173,7 @@ struct ContentView: View {
 
             // Manual widget refresh button
             Button(action: {
+                HapticManager.shared.buttonTap()
                 refreshWidget()
             }) {
                 Image(systemName: "arrow.clockwise")
@@ -181,7 +186,7 @@ struct ContentView: View {
                     )
                     .rotationEffect(.degrees(showingRefreshAnimation ? 360 : 0))
             }
-            .buttonStyle(PlainButtonStyle())
+            .springyButton(scale: 0.9)
             .help("手動刷新 Widget")
         }
         .padding(.horizontal, 20)
@@ -190,8 +195,9 @@ struct ContentView: View {
     private func refreshWidget() {
         print("🔄 手動刷新 Widget...")
 
-        // Trigger rotation animation
-        withAnimation(.linear(duration: 0.5)) {
+        // Trigger rotation animation with smooth spring
+        withAnimation(.spring(response: Constants.smoothSpringResponse,
+                            dampingFraction: 0.8)) {
             showingRefreshAnimation = true
         }
 
@@ -207,6 +213,7 @@ struct ContentView: View {
                 // Reset animation after a delay
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     showingRefreshAnimation = false
+                    HapticManager.shared.refreshCompleted()
                 }
             }
         }
@@ -223,16 +230,7 @@ struct ContentView: View {
             StatsView(viewModel: viewModel)
                 .frame(height: 100)
         }
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(hex: "#1a1a1a"),
-                    Color(hex: "#0f0f0f")
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        .background(.thickMaterial)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)

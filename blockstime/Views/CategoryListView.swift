@@ -12,6 +12,8 @@ struct CategoryListView: View {
     @State private var selectedCategoryForColor: Category?
     @State private var showColorPicker = false
     @FocusState private var focusedField: Bool
+    @Namespace private var colorAnimation
+    @State private var addButtonPressed = false
 
     var body: some View {
         VStack(spacing: 15) {
@@ -43,16 +45,32 @@ struct CategoryListView: View {
                                 showColorPicker = true
                             },
                             onRemove: {
-                                viewModel.removeCategory(category)
-                            }
+                                withAnimation(.spring(response: Constants.springResponse,
+                                                    dampingFraction: Constants.springDampingFraction)) {
+                                    viewModel.removeCategory(category)
+                                }
+                            },
+                            colorAnimation: colorAnimation
                         )
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .leading).combined(with: .opacity),
+                            removal: .move(edge: .trailing).combined(with: .opacity)
+                        ))
                     }
                 }
             }
 
             // Add button
             Button(action: {
-                viewModel.addCategory()
+                HapticManager.shared.itemAdded()
+                addButtonPressed = true
+                withAnimation(.spring(response: Constants.springResponse,
+                                    dampingFraction: Constants.springDampingFraction)) {
+                    viewModel.addCategory()
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    addButtonPressed = false
+                }
             }) {
                 Text("+ 新增類別")
                     .font(.system(size: 15, weight: .semibold))
@@ -72,19 +90,11 @@ struct CategoryListView: View {
                     )
                     .cornerRadius(8)
             }
-            .buttonStyle(PlainButtonStyle())
+            .bounceButton()
+            .pulseEffect(isActive: addButtonPressed)
         }
         .padding(20)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(hex: "#1a1a1a"),
-                    Color(hex: "#0f0f0f")
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        .background(.thickMaterial)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
@@ -94,6 +104,7 @@ struct CategoryListView: View {
         .sheet(isPresented: $showColorPicker) {
             ColorPickerView(
                 selectedColor: selectedCategoryForColor?.color ?? LegoColor.allColors[0],
+                colorAnimation: colorAnimation,
                 onColorSelected: { color in
                     if let category = selectedCategoryForColor {
                         viewModel.updateCategoryColor(category, colorId: color.id)
@@ -117,6 +128,7 @@ struct CategoryListView: View {
 
 struct ColorPickerView: View {
     let selectedColor: LegoColor
+    let colorAnimation: Namespace.ID
     let onColorSelected: (LegoColor) -> Void
 
     var body: some View {
@@ -128,6 +140,7 @@ struct ColorPickerView: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 15) {
                 ForEach(LegoColor.allColors) { color in
                     Button(action: {
+                        HapticManager.shared.colorPicked()
                         onColorSelected(color)
                     }) {
                         ZStack {
@@ -144,6 +157,7 @@ struct ColorPickerView: View {
                                     )
                                 )
                                 .frame(width: 50, height: 50)
+                                .matchedGeometryEffect(id: "color-\(color.id)", in: colorAnimation)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(
@@ -158,13 +172,13 @@ struct ColorPickerView: View {
                         }
                         .frame(width: 60, height: 60)
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .glowButton(color: color.mainColor)
                 }
             }
             .padding(.horizontal)
 
             Spacer()
         }
-        .background(Color(hex: "#1a1a1a"))
+        .background(.regularMaterial)
     }
 }

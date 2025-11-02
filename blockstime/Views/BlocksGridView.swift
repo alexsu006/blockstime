@@ -100,8 +100,18 @@ struct BlocksGridView: View {
                     columns: Array(repeating: GridItem(.fixed(blockSize), spacing: Constants.blockGap), count: columns),
                     spacing: Constants.blockGap
                 ) {
-                    ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
+                    ForEach(Array(allBlocks.enumerated()), id: \.offset) { index, block in
                         LegoBlock(number: block.blockIndex + 1, color: block.category.color, size: blockSize)
+                            .transition(.asymmetric(
+                                insertion: .scale(scale: 0.1).combined(with: .opacity),
+                                removal: .scale(scale: 0.1).combined(with: .opacity)
+                            ))
+                            .animation(
+                                .spring(response: Constants.springResponse,
+                                      dampingFraction: Constants.springDampingFraction)
+                                .delay(Double(index) * 0.01),
+                                value: allBlocks.count
+                            )
                     }
                 }
                 .padding(15)

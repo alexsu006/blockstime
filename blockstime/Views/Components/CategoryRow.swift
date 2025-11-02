@@ -14,21 +14,25 @@ struct CategoryRow: View {
     let onHoursChange: (Double) -> Void
     let onColorTap: () -> Void
     let onRemove: () -> Void
+    let colorAnimation: Namespace.ID?
 
     @State private var sliderValue: Double
+    @State private var lastHapticValue: Double = 0
 
     init(category: Category,
          maxAvailableHours: Double,
          onNameChange: @escaping (String) -> Void,
          onHoursChange: @escaping (Double) -> Void,
          onColorTap: @escaping () -> Void,
-         onRemove: @escaping () -> Void) {
+         onRemove: @escaping () -> Void,
+         colorAnimation: Namespace.ID? = nil) {
         self.category = category
         self.maxAvailableHours = maxAvailableHours
         self.onNameChange = onNameChange
         self.onHoursChange = onHoursChange
         self.onColorTap = onColorTap
         self.onRemove = onRemove
+        self.colorAnimation = colorAnimation
         _sliderValue = State(initialValue: category.hours)
     }
 
@@ -37,29 +41,37 @@ struct CategoryRow: View {
             // Header: Color + Name + Remove
             HStack(spacing: 8) {
                 // Color button
-                Button(action: onColorTap) {
+                Button(action: {
+                    HapticManager.shared.buttonTap()
+                    onColorTap()
+                }) {
                     ZStack {
                         Color.clear
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        category.color.lightColor,
-                                        category.color.mainColor
-                                    ]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
+                        Group {
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            category.color.lightColor,
+                                            category.color.mainColor
+                                        ]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
                                 )
-                            )
-                            .frame(width: 24, height: 24)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color.gray, lineWidth: 2)
-                            )
+                                .frame(width: 24, height: 24)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.gray, lineWidth: 2)
+                                )
+                        }
+                        .if(colorAnimation != nil) { view in
+                            view.matchedGeometryEffect(id: "color-\(category.colorId)", in: colorAnimation!)
+                        }
                     }
                     .frame(width: 44, height: 44)
                 }
-                .buttonStyle(PlainButtonStyle())
+                .springyButton()
 
                 // Name input
                 TextField("類別名稱", text: .init(
@@ -71,7 +83,10 @@ struct CategoryRow: View {
                 .frame(height: 28)
 
                 // Remove button
-                Button(action: onRemove) {
+                Button(action: {
+                    HapticManager.shared.itemDeleted()
+                    onRemove()
+                }) {
                     ZStack {
                         Color.clear
                         Text("×")
@@ -83,7 +98,7 @@ struct CategoryRow: View {
                     }
                     .frame(width: 44, height: 44)
                 }
-                .buttonStyle(PlainButtonStyle())
+                .shrinkButton()
             }
 
             // Hours slider with value display
@@ -96,9 +111,17 @@ struct CategoryRow: View {
 
                     Spacer()
 
-                    Text(String(format: "%.1f h", sliderValue))
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(Color(hex: "#00D9A3"))
+                    HStack(spacing: 2) {
+                        AnimatedNumberText(
+                            value: sliderValue,
+                            format: "%.1f",
+                            font: .system(size: 14, weight: .bold),
+                            foregroundColor: Color(hex: "#00D9A3")
+                        )
+                        Text("h")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(Color(hex: "#00D9A3"))
+                    }
                 }
 
                 // Slider
@@ -111,6 +134,11 @@ struct CategoryRow: View {
                     Slider(value: $sliderValue, in: 0...maxAvailableHours, step: 0.5)
                         .accentColor(category.color.mainColor)
                         .onChange(of: sliderValue) { newValue in
+                            // Trigger haptic feedback every 0.5 hour change
+                            if abs(newValue - lastHapticValue) >= 0.5 {
+                                HapticManager.shared.sliderChange()
+                                lastHapticValue = newValue
+                            }
                             onHoursChange(newValue)
                         }
 
@@ -136,7 +164,7 @@ struct CategoryRow: View {
             .padding(.top, 4)
         }
         .padding(Constants.categoryItemPadding)
-        .background(Color(hex: "#0f0f0f"))
+        .background(.regularMaterial)
         .cornerRadius(10)
         .overlay(
             RoundedRectangle(cornerRadius: 10)
