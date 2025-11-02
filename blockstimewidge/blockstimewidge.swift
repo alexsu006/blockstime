@@ -287,7 +287,7 @@ struct SmallWidgetView: View {
             let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
 
             // Increase minimum block size to make blocks more visible
-            if blockSize >= 6 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
+            if blockSize >= 12 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -391,7 +391,7 @@ struct MediumWidgetView: View {
             let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
 
             // Lower minimum to ensure all blocks fit
-            if blockSize >= 4.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
+            if blockSize >= 6 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -456,6 +456,7 @@ struct MediumWidgetView: View {
                                     .font(.system(size: 8.5, weight: .bold))
                                     .foregroundColor(.white)
                                     .lineLimit(1)
+                                    .truncationMode(.tail)
 
                                 HStack(spacing: 2) {
                                     Text("\(Int(category.hours))h")
@@ -466,7 +467,9 @@ struct MediumWidgetView: View {
                                         .font(.system(size: 7, weight: .medium))
                                         .foregroundColor(.white.opacity(0.6))
                                 }
+                                .lineLimit(1)
                             }
+                            .frame(maxWidth: 65)
                         }
                     }
                     Spacer(minLength: 0)
@@ -540,7 +543,7 @@ struct LargeWidgetView: View {
             let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
 
             // Increase minimum block size to make blocks more prominent
-            if blockSize >= 18 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
+            if blockSize >= 18.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -607,6 +610,7 @@ struct LargeWidgetView: View {
                                         .font(.system(size: 10, weight: .bold))
                                         .foregroundColor(.white)
                                         .lineLimit(1)
+                                        .truncationMode(.tail)
 
                                     HStack(spacing: 2) {
                                         Text("\(Int(category.hours))h")
@@ -617,7 +621,9 @@ struct LargeWidgetView: View {
                                             .font(.system(size: 8, weight: .medium))
                                             .foregroundColor(.white.opacity(0.6))
                                     }
+                                    .lineLimit(1)
                                 }
+                                .frame(maxWidth: 80)
                             }
                         }
                     }
