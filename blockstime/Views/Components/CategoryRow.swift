@@ -114,7 +114,7 @@ struct CategoryRow: View {
                     HStack(spacing: 2) {
                         AnimatedNumberText(
                             value: sliderValue,
-                            format: "%.1f",
+                            format: "%.0f",
                             font: .system(size: 14, weight: .bold),
                             foregroundColor: Color(hex: "#00D9A3")
                         )
@@ -131,11 +131,11 @@ struct CategoryRow: View {
                         .foregroundColor(.gray)
                         .frame(width: 20)
 
-                    Slider(value: $sliderValue, in: 0...maxAvailableHours, step: 0.5)
+                    Slider(value: $sliderValue, in: 0...maxAvailableHours, step: 1.0)
                         .accentColor(category.color.mainColor)
                         .onChange(of: sliderValue) { newValue in
-                            // Trigger haptic feedback every 0.5 hour change
-                            if abs(newValue - lastHapticValue) >= 0.5 {
+                            // Trigger haptic feedback every 1 hour change
+                            if abs(newValue - lastHapticValue) >= 1.0 {
                                 HapticManager.shared.sliderChange()
                                 lastHapticValue = newValue
                             }
@@ -157,7 +157,7 @@ struct CategoryRow: View {
 
                 Spacer()
 
-                Text(String(format: "%.1f%%", category.percentage))
+                Text(String(format: "%.0f%%", category.percentage))
                     .font(.system(size: 12))
                     .foregroundColor(.gray)
             }
