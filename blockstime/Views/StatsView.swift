@@ -68,7 +68,7 @@ struct StatItem: View {
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 AnimatedNumberText(
                     value: value,
-                    format: "%.1f",
+                    format: "%.0f",
                     font: .system(size: 20, weight: .bold),
                     foregroundColor: .white
                 )

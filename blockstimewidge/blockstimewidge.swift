@@ -470,8 +470,8 @@ struct LargeWidgetView: View {
         let rows = 14
         let spacing: CGFloat = 1.0
 
-        // Reserve space for bottom legend - horizontal scrollable layout
-        let legendHeight: CGFloat = 20  // Ultra compact legend area
+        // Reserve space for bottom legend - yellow bar layout
+        let legendHeight: CGFloat = 26  // Space for yellow legend bar
         let padding: CGFloat = 4  // Reduced padding for more space
         let sectionSpacing: CGFloat = 2  // Reduced spacing
 
@@ -512,47 +512,47 @@ struct LargeWidgetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
 
-                // Bottom Legend - Compact horizontal scrollable layout
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 5) {
-                        ForEach(categories.filter({ $0.hours > 0 }), id: \.id) { category in
-                            HStack(spacing: 2) {
-                                // Compact color indicator
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(
-                                        LinearGradient(
-                                            gradient: Gradient(colors: [
-                                                category.color.lightColor,
-                                                category.color.mainColor,
-                                                category.color.darkColor
-                                            ]),
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
+                // Bottom Legend - Yellow bar with category labels
+                HStack(spacing: 8) {
+                    ForEach(categories.filter({ $0.hours > 0 }), id: \.id) { category in
+                        HStack(spacing: 3) {
+                            // Larger color indicator block
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            category.color.lightColor,
+                                            category.color.mainColor,
+                                            category.color.darkColor
+                                        ]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
                                     )
-                                    .frame(width: 8, height: 8)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 2)
-                                            .stroke(category.color.darkColor.opacity(0.3), lineWidth: 0.5)
-                                    )
+                                )
+                                .frame(width: 12, height: 12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .stroke(category.color.darkColor.opacity(0.4), lineWidth: 0.8)
+                                )
 
-                                // Compact single line text
-                                Text("\(category.name) \(Int(category.hours))h")
-                                    .font(.system(size: 7.5, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                            }
+                            // Category name and hours
+                            Text("\(category.name) \(Int(category.hours))h")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(.black)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
                         }
                     }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
+                    Spacer(minLength: 0)
                 }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
                 .background(
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.white.opacity(0.05))
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color(red: 1.0, green: 0.84, blue: 0.0)) // Bright yellow
                 )
                 .padding(.horizontal, 4)
+                .padding(.bottom, 2)
             }
             .padding(4)
         }
