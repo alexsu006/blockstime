@@ -15,30 +15,29 @@ struct AnimatedNumberText: View {
     var foregroundColor: Color = .white
 
     var body: some View {
-        Text(String(format: format, value))
+        AnimatableNumberView(number: value, format: format)
             .font(font)
             .foregroundColor(foregroundColor)
-            .modifier(AnimatableNumberModifier(number: value, format: format))
             .animation(.spring(response: Constants.springResponse,
                              dampingFraction: Constants.springDampingFraction),
                       value: value)
     }
 }
 
-/// 可動畫的數字 Modifier
-struct AnimatableNumberModifier: AnimatableModifier {
+/// 可動畫的數字 View
+private struct AnimatableNumberView: View {
     var number: Double
     let format: String
 
+    var body: some View {
+        Text(String(format: format, number))
+    }
+}
+
+extension AnimatableNumberView: Animatable {
     var animatableData: Double {
         get { number }
         set { number = newValue }
-    }
-
-    func body(content: Content) -> some View {
-        Text(String(format: format, number))
-            .font(content.font ?? .body)
-            .foregroundColor(content.foregroundColor ?? .primary)
     }
 }
 
