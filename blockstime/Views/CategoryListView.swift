@@ -21,7 +21,7 @@ struct CategoryListView: View {
             HStack(spacing: 8) {
                 Text("📋")
                     .font(.system(size: 18))
-                Text("時間類別")
+                Text("時間項目")
                     .font(.system(size: 18, weight: .bold))
                 Spacer()
             }
@@ -72,7 +72,7 @@ struct CategoryListView: View {
                     addButtonPressed = false
                 }
             }) {
-                Text("+ 新增類別")
+                Text("+ 新增項目")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity)

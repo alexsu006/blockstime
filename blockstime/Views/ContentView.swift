@@ -78,7 +78,7 @@ struct ContentView: View {
         GeometryReader { geometry in
             if geometry.size.width <= 768 {
                 HStack(spacing: 12) {
-                    liquidGlassTabButton(title: "📦 類別", index: 0)
+                    liquidGlassTabButton(title: "📦 項目", index: 0)
                     liquidGlassTabButton(title: "📊 視覺化", index: 1)
                 }
                 .padding(6)
