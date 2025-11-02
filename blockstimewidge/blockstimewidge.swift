@@ -617,7 +617,7 @@ struct LargeWidgetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
 
-                // Bottom Legend - Multi-line yellow bar with ALL categories
+                // Bottom Legend - Multi-line flow layout with ALL categories
                 FlowLayout(spacing: 8) {
                     ForEach(visibleCategories, id: \.id) { category in
                         HStack(spacing: 3) {
@@ -643,7 +643,7 @@ struct LargeWidgetView: View {
                             // Category name and hours
                             Text("\(category.name) \(Int(category.hours))h")
                                 .font(.system(size: 9, weight: .bold))
-                                .foregroundColor(.black)
+                                .foregroundColor(.white)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                         }
@@ -652,8 +652,8 @@ struct LargeWidgetView: View {
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
                 .background(
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color(red: 1.0, green: 0.84, blue: 0.0)) // Bright yellow
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.05))
                 )
                 .padding(.horizontal, 4)
                 .padding(.bottom, 2)
