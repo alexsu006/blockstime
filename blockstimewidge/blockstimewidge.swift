@@ -250,7 +250,7 @@ struct SmallWidgetView: View {
         for category in categories.filter({ $0.hours > 0 }) {
             for index in 0..<category.blocksCount {
                 blocks.append((category, index))
-            }
+            
         }
         return blocks
     }
