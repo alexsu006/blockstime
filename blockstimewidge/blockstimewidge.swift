@@ -313,7 +313,7 @@ struct SmallWidgetView: View {
 
             // Only display blocks - no title, no legend, maximize space
             // Remove all spacers to fill the entire widget
-            LazyVGrid(
+            return LazyVGrid(
                 columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
                 alignment: .center,
                 spacing: spacing
@@ -406,7 +406,7 @@ struct MediumWidgetView: View {
             let blockSize = layout.blockSize
             let spacing = layout.spacing
 
-            VStack(spacing: 2) {
+            return VStack(spacing: 2) {
                 // Blocks Grid - fills most of the space, no spacers
                 LazyVGrid(
                     columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
@@ -536,7 +536,7 @@ struct LargeWidgetView: View {
             let blockSize = layout.blockSize
             let spacing = layout.spacing
 
-            VStack(spacing: 2) {
+            return VStack(spacing: 2) {
                 // Blocks Grid - fills most of the space, no spacers
                 LazyVGrid(
                     columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
