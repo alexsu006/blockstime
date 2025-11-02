@@ -290,7 +290,7 @@ struct SmallWidgetView: View {
 
             // Only display blocks - no title, no legend, maximize space
             // Remove all spacers to fill the entire widget
-            LazyVGrid(
+            return LazyVGrid(
                 columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
                 alignment: .center,
                 spacing: spacing
@@ -351,9 +351,9 @@ struct MediumWidgetView: View {
         let spacing: CGFloat = 0.8
 
         // Reserve space for bottom legend (compact horizontal layout)
-        let legendHeight: CGFloat = 26  // Compact legend at bottom
+        let legendHeight: CGFloat = 18  // Ultra compact legend at bottom
         let padding: CGFloat = 4
-        let sectionSpacing: CGFloat = 3
+        let sectionSpacing: CGFloat = 2
 
         let availableWidth = max(0, width - padding * 2)
         let availableHeight = max(0, height - legendHeight - padding * 2 - sectionSpacing)
@@ -374,7 +374,7 @@ struct MediumWidgetView: View {
             let blockSize = layout.blockSize
             let spacing = layout.spacing
 
-            VStack(spacing: 3) {
+            return VStack(spacing: 2) {
                 // Blocks Grid - fills most of the space, no spacers
                 LazyVGrid(
                     columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
@@ -392,12 +392,12 @@ struct MediumWidgetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
 
-                // Bottom Legend - Top 3 categories horizontal layout
-                HStack(spacing: 6) {
+                // Bottom Legend - Compact single line layout
+                HStack(spacing: 4) {
                     ForEach(topCategories, id: \.id) { category in
-                        HStack(spacing: 3) {
-                            // Color indicator
-                            RoundedRectangle(cornerRadius: 2.5)
+                        HStack(spacing: 2) {
+                            // Compact color indicator
+                            RoundedRectangle(cornerRadius: 1.5)
                                 .fill(
                                     LinearGradient(
                                         gradient: Gradient(colors: [
@@ -409,39 +409,26 @@ struct MediumWidgetView: View {
                                         endPoint: .bottomTrailing
                                     )
                                 )
-                                .frame(width: 11, height: 11)
+                                .frame(width: 7, height: 7)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 2.5)
-                                        .stroke(category.color.darkColor.opacity(0.3), lineWidth: 0.8)
+                                    RoundedRectangle(cornerRadius: 1.5)
+                                        .stroke(category.color.darkColor.opacity(0.3), lineWidth: 0.5)
                                 )
 
-                            VStack(alignment: .leading, spacing: 0) {
-                                Text(category.name)
-                                    .font(.system(size: 8.5, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-
-                                HStack(spacing: 2) {
-                                    Text("\(Int(category.hours))h")
-                                        .font(.system(size: 8, weight: .semibold))
-                                        .foregroundColor(.white.opacity(0.85))
-
-                                    Text("(\(Int((category.hours / totalHours) * 100))%)")
-                                        .font(.system(size: 7, weight: .medium))
-                                        .foregroundColor(.white.opacity(0.6))
-                                }
+                            // Compact single line text
+                            Text("\(category.name) \(Int(category.hours))h")
+                                .font(.system(size: 7, weight: .semibold))
+                                .foregroundColor(.white)
                                 .lineLimit(1)
-                            }
-                            .frame(maxWidth: 65)
+                                .truncationMode(.tail)
                         }
                     }
                     Spacer(minLength: 0)
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
                 .background(
-                    RoundedRectangle(cornerRadius: 5)
+                    RoundedRectangle(cornerRadius: 4)
                         .fill(Color.white.opacity(0.05))
                 )
                 .padding(.horizontal, 4)
@@ -484,9 +471,9 @@ struct LargeWidgetView: View {
         let spacing: CGFloat = 1.0
 
         // Reserve space for bottom legend - horizontal scrollable layout
-        let legendHeight: CGFloat = 32  // Bottom legend area
+        let legendHeight: CGFloat = 20  // Ultra compact legend area
         let padding: CGFloat = 4  // Reduced padding for more space
-        let sectionSpacing: CGFloat = 3  // Reduced spacing
+        let sectionSpacing: CGFloat = 2  // Reduced spacing
 
         let availableWidth = max(0, width - padding * 2)
         let availableHeight = max(0, height - legendHeight - padding * 2 - sectionSpacing)
@@ -507,7 +494,7 @@ struct LargeWidgetView: View {
             let blockSize = layout.blockSize
             let spacing = layout.spacing
 
-            VStack(spacing: 4) {
+            return VStack(spacing: 2) {
                 // Blocks Grid - fills most of the space, no spacers
                 LazyVGrid(
                     columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
@@ -525,13 +512,13 @@ struct LargeWidgetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
 
-                // Bottom Legend - All categories horizontal scrollable layout
+                // Bottom Legend - Compact horizontal scrollable layout
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 5) {
                         ForEach(categories.filter({ $0.hours > 0 }), id: \.id) { category in
-                            HStack(spacing: 3) {
-                                // Color indicator
-                                RoundedRectangle(cornerRadius: 3)
+                            HStack(spacing: 2) {
+                                // Compact color indicator
+                                RoundedRectangle(cornerRadius: 2)
                                     .fill(
                                         LinearGradient(
                                             gradient: Gradient(colors: [
@@ -543,40 +530,26 @@ struct LargeWidgetView: View {
                                             endPoint: .bottomTrailing
                                         )
                                     )
-                                    .frame(width: 12, height: 12)
+                                    .frame(width: 8, height: 8)
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 3)
-                                            .stroke(category.color.darkColor.opacity(0.3), lineWidth: 0.8)
+                                        RoundedRectangle(cornerRadius: 2)
+                                            .stroke(category.color.darkColor.opacity(0.3), lineWidth: 0.5)
                                     )
-                                    .shadow(color: category.color.glowColor.opacity(0.15), radius: 1, x: 0, y: 0.5)
 
-                                VStack(alignment: .leading, spacing: 0) {
-                                    Text(category.name)
-                                        .font(.system(size: 10, weight: .bold))
-                                        .foregroundColor(.white)
-                                        .lineLimit(1)
-                                        .truncationMode(.tail)
-
-                                    HStack(spacing: 2) {
-                                        Text("\(Int(category.hours))h")
-                                            .font(.system(size: 9, weight: .semibold))
-                                            .foregroundColor(.white.opacity(0.85))
-
-                                        Text("(\(Int((category.hours / totalHours) * 100))%)")
-                                            .font(.system(size: 8, weight: .medium))
-                                            .foregroundColor(.white.opacity(0.6))
-                                    }
+                                // Compact single line text
+                                Text("\(category.name) \(Int(category.hours))h")
+                                    .font(.system(size: 7.5, weight: .semibold))
+                                    .foregroundColor(.white)
                                     .lineLimit(1)
-                                }
-                                .frame(maxWidth: 80)
+                                    .truncationMode(.tail)
                             }
                         }
                     }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
                 }
                 .background(
-                    RoundedRectangle(cornerRadius: 5)
+                    RoundedRectangle(cornerRadius: 4)
                         .fill(Color.white.opacity(0.05))
                 )
                 .padding(.horizontal, 4)

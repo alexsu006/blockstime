@@ -22,7 +22,10 @@ struct StatsView: View {
                     )
                     // Use stable ID for better animation performance
                     .id(category.id)
-                    .transition(.opacity.combined(with: .scale))
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.8).combined(with: .opacity),
+                        removal: .scale(scale: 0.8).combined(with: .opacity)
+                    ))
                 }
 
                 // Remaining hours
@@ -33,14 +36,20 @@ struct StatsView: View {
                         color: Color(hex: "#666666")
                     )
                     .id("remaining")
-                    .transition(.opacity.combined(with: .scale))
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.8).combined(with: .opacity),
+                        removal: .scale(scale: 0.8).combined(with: .opacity)
+                    ))
                 }
             }
             .padding(.horizontal, 15)
             .padding(.vertical, 20)
-            .animation(.easeInOut(duration: Constants.defaultAnimationDuration), value: viewModel.categories.map { $0.hours })
+            .animation(.spring(response: Constants.springResponse,
+                             dampingFraction: Constants.springDampingFraction,
+                             blendDuration: Constants.springBlendDuration),
+                      value: viewModel.categories.map { $0.hours })
         }
-        .background(Color.black.opacity(0.3))
+        .background(.ultraThinMaterial)
         .cornerRadius(12)
     }
 }
@@ -57,9 +66,12 @@ struct StatItem: View {
                 .foregroundColor(.gray)
 
             HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(String(format: "%.1f", value))
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
+                AnimatedNumberText(
+                    value: value,
+                    format: "%.1f",
+                    font: .system(size: 20, weight: .bold),
+                    foregroundColor: .white
+                )
 
                 Text("h")
                     .font(.system(size: 10))
@@ -68,16 +80,7 @@ struct StatItem: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color.black.opacity(0.5),
-                    Color.black.opacity(0.2)
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        .background(.thinMaterial)
         .cornerRadius(6)
         .overlay(
             Rectangle()
