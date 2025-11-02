@@ -19,7 +19,7 @@ class HapticManager {
     private let impactHeavy = UIImpactFeedbackGenerator(style: .heavy)
     private let impactSoft = UIImpactFeedbackGenerator(style: .soft)
     private let impactRigid = UIImpactFeedbackGenerator(style: .rigid)
-    private let selection = UISelectionFeedbackGenerator()
+    private let selectionGenerator = UISelectionFeedbackGenerator()
     private let notification = UINotificationFeedbackGenerator()
     #endif
 
@@ -31,7 +31,7 @@ class HapticManager {
         impactHeavy.prepare()
         impactSoft.prepare()
         impactRigid.prepare()
-        selection.prepare()
+        selectionGenerator.prepare()
         notification.prepare()
         #endif
     }
@@ -83,8 +83,8 @@ class HapticManager {
     /// 選擇反饋 - 用於選項變更（如 Tab 切換、選擇器）
     func selection() {
         #if canImport(UIKit)
-        selection.selectionChanged()
-        selection.prepare()
+        selectionGenerator.selectionChanged()
+        selectionGenerator.prepare()
         #endif
     }
 
