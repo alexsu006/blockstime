@@ -623,22 +623,28 @@ struct LargeWidgetView: View {
         }
 
         // Optimized spacing to maximize block display area
-        let headerHeight: CGFloat = 40  // Compact header with adequate spacing
-        let legendHeight: CGFloat = 65  // Moved legend below header, needs more space
-        let horizontalPadding: CGFloat = 28
-        let verticalPadding: CGFloat = 20
+        // 實際佈局：Header (標題 + badge) -> Legend (圖例) -> Blocks Grid
+        let headerHeight: CGFloat = 32  // 標題區域（含 padding）
+        let legendHeight: CGFloat = 42  // 圖例區域（含 padding）
+        let topPadding: CGFloat = 8     // 頂部 padding
+        let bottomPadding: CGFloat = 8  // 底部 padding
+        let sectionSpacing: CGFloat = 4 // 區域間距
+        let horizontalPadding: CGFloat = 24
+
+        let totalVerticalSpace = headerHeight + legendHeight + topPadding + bottomPadding + (sectionSpacing * 2)
         let availableWidth = max(0, width - horizontalPadding)
-        let availableHeight = max(0, height - headerHeight - legendHeight - verticalPadding)
+        let availableHeight = max(0, height - totalVerticalSpace)
 
         var bestColumns = 14
         var bestRows = 12
         var bestBlockSize: CGFloat = 13
-        var bestSpacing: CGFloat = 2.0
+        var bestSpacing: CGFloat = 1.8
 
         // Try different column counts to find optimal layout
-        for cols in stride(from: 24, through: 14, by: -1) {
+        // 擴大搜尋範圍從 28 到 14 列，使用更小的間距
+        for cols in stride(from: 28, through: 14, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 2.0
+            let spacing: CGFloat = 1.8  // 減少間距以容納更多區塊
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
@@ -649,7 +655,8 @@ struct LargeWidgetView: View {
             let totalWidthNeeded = CGFloat(cols) * blockSize + CGFloat(cols - 1) * spacing
             let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
 
-            if blockSize >= 12 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
+            // 降低最小區塊大小限制至 10pt，讓更多區塊能顯示
+            if blockSize >= 10 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -668,41 +675,41 @@ struct LargeWidgetView: View {
             let blockSize = layout.blockSize
             let spacing = layout.spacing
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 4) {
                 // Compact Header with 168h badge
-                HStack(alignment: .center, spacing: 8) {
+                HStack(alignment: .center, spacing: 6) {
                     Text("週時間規劃")
-                        .font(.system(size: 16, weight: .bold))
+                        .font(.system(size: 15, weight: .bold))
                         .foregroundColor(.white)
 
                     // Prominent 168h badge
-                    HStack(spacing: 3) {
+                    HStack(spacing: 2) {
                         Image(systemName: "clock.fill")
-                            .font(.system(size: 10))
+                            .font(.system(size: 9))
                             .foregroundColor(.white.opacity(0.9))
                         Text("168h")
-                            .font(.system(size: 12, weight: .bold))
+                            .font(.system(size: 11, weight: .bold))
                             .foregroundColor(.white)
                     }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
                     .background(
-                        RoundedRectangle(cornerRadius: 6)
+                        RoundedRectangle(cornerRadius: 5)
                             .fill(Color.white.opacity(0.15))
                     )
 
                     Spacer(minLength: 0)
                 }
-                .padding(.horizontal, 14)
-                .padding(.top, 10)
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
 
                 // Categories Legend - Scrollable if too many categories
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
+                    HStack(spacing: 10) {
                         ForEach(categories.filter({ $0.hours > 0 }), id: \.id) { category in
-                            HStack(spacing: 5) {
-                                // Larger, more prominent color indicator
-                                RoundedRectangle(cornerRadius: 4)
+                            HStack(spacing: 4) {
+                                // Compact color indicator
+                                RoundedRectangle(cornerRadius: 3)
                                     .fill(
                                         LinearGradient(
                                             gradient: Gradient(colors: [
@@ -714,40 +721,40 @@ struct LargeWidgetView: View {
                                             endPoint: .bottomTrailing
                                         )
                                     )
-                                    .frame(width: 18, height: 18)
+                                    .frame(width: 14, height: 14)
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .stroke(category.color.darkColor.opacity(0.4), lineWidth: 1.2)
+                                        RoundedRectangle(cornerRadius: 3)
+                                            .stroke(category.color.darkColor.opacity(0.3), lineWidth: 1)
                                     )
-                                    .shadow(color: category.color.glowColor.opacity(0.2), radius: 1.5, x: 0, y: 1)
+                                    .shadow(color: category.color.glowColor.opacity(0.15), radius: 1, x: 0, y: 0.5)
 
-                                VStack(alignment: .leading, spacing: 1) {
+                                VStack(alignment: .leading, spacing: 0) {
                                     Text(category.name)
-                                        .font(.system(size: 12, weight: .bold))
+                                        .font(.system(size: 11, weight: .bold))
                                         .foregroundColor(.white)
                                         .lineLimit(1)
 
-                                    HStack(spacing: 3) {
+                                    HStack(spacing: 2) {
                                         Text("\(Int(category.hours))h")
-                                            .font(.system(size: 11, weight: .semibold))
+                                            .font(.system(size: 10, weight: .semibold))
                                             .foregroundColor(.white.opacity(0.85))
 
                                         Text("(\(Int(category.hours / 168.0 * 100))%)")
-                                            .font(.system(size: 10, weight: .medium))
+                                            .font(.system(size: 9, weight: .medium))
                                             .foregroundColor(.white.opacity(0.6))
                                     }
                                 }
                             }
                         }
                     }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 4)
                 }
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: 6)
                         .fill(Color.white.opacity(0.05))
                 )
-                .padding(.horizontal, 14)
+                .padding(.horizontal, 12)
 
                 // Blocks Grid - centered and properly constrained
                 HStack {
@@ -767,8 +774,9 @@ struct LargeWidgetView: View {
                     }
                     Spacer(minLength: 0)
                 }
-                .padding(.horizontal, 14)
-                .padding(.bottom, 10)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 8)
+                .padding(.top, 2)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
