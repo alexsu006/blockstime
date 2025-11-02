@@ -275,22 +275,22 @@ struct SmallWidgetView: View {
             return (7, 7, 10, 2)
         }
 
-        let headerHeight: CGFloat = 32  // Slightly increased for better spacing
-        let legendHeight: CGFloat = 56  // Space for improved legend
-        let horizontalPadding: CGFloat = 20
-        let verticalPadding: CGFloat = 16
+        let headerHeight: CGFloat = 24  // Compact header to maximize blocks display
+        let legendHeight: CGFloat = 48  // Compact legend for top categories
+        let horizontalPadding: CGFloat = 16
+        let verticalPadding: CGFloat = 12
         let availableWidth = max(0, width - horizontalPadding)
         let availableHeight = max(0, height - headerHeight - legendHeight - verticalPadding)
 
-        var bestColumns = 7
-        var bestRows = 24
-        var bestBlockSize: CGFloat = 5
-        var bestSpacing: CGFloat = 1.0
+        var bestColumns = 14
+        var bestRows = 12
+        var bestBlockSize: CGFloat = 4
+        var bestSpacing: CGFloat = 0.8
 
-        // Try different column counts to find optimal layout
-        for cols in stride(from: 14, through: 7, by: -1) {
+        // Try different column counts to find optimal layout - start with more columns for smaller blocks
+        for cols in stride(from: 21, through: 12, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
-            let spacing: CGFloat = 1.0
+            let spacing: CGFloat = 0.8  // Reduced spacing for more compact layout
 
             let widthBasedSize = (availableWidth - CGFloat(cols - 1) * spacing) / CGFloat(cols)
             let heightBasedSize = (availableHeight - CGFloat(rows - 1) * spacing) / CGFloat(rows)
@@ -301,7 +301,8 @@ struct SmallWidgetView: View {
             let totalWidthNeeded = CGFloat(cols) * blockSize + CGFloat(cols - 1) * spacing
             let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
 
-            if blockSize >= 4.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
+            // Reduced minimum block size to 3.5 to fit more blocks
+            if blockSize >= 3.5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
@@ -320,32 +321,33 @@ struct SmallWidgetView: View {
             let blockSize = layout.blockSize
             let spacing = layout.spacing
 
-            VStack(spacing: 5) {
-                // Compact header with 168h badge
-                HStack(alignment: .center, spacing: 6) {
-                    Text("週時間")
-                        .font(.system(size: 11, weight: .bold))
+            VStack(spacing: 4) {
+                // Ultra-compact header
+                HStack(alignment: .center, spacing: 4) {
+                    Image(systemName: "square.grid.3x3.fill")
+                        .font(.system(size: 9))
+                        .foregroundColor(.white.opacity(0.9))
+
+                    Text("時間")
+                        .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.white)
 
-                    HStack(spacing: 3) {
-                        Image(systemName: "clock.fill")
-                            .font(.system(size: 7))
-                            .foregroundColor(.white.opacity(0.8))
+                    HStack(spacing: 2) {
                         Text("168h")
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundColor(.white)
+                            .font(.system(size: 8, weight: .bold))
+                            .foregroundColor(.white.opacity(0.8))
                     }
-                    .padding(.horizontal, 5)
-                    .padding(.vertical, 2)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 1.5)
                     .background(
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.white.opacity(0.15))
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(Color.white.opacity(0.12))
                     )
 
                     Spacer(minLength: 0)
                 }
-                .padding(.horizontal, 10)
-                .padding(.top, 8)
+                .padding(.horizontal, 8)
+                .padding(.top, 6)
 
                 // Blocks Grid - centered and properly constrained
                 HStack {
@@ -365,14 +367,14 @@ struct SmallWidgetView: View {
                     }
                     Spacer(minLength: 0)
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, 3)
 
-                // Enhanced legend - show top 2 categories with stats
-                VStack(spacing: 3) {
+                // Ultra-compact legend - show top 2 categories with essential info
+                VStack(spacing: 2) {
                     ForEach(topCategories, id: \.id) { category in
-                        HStack(spacing: 4) {
-                            // Color indicator
-                            RoundedRectangle(cornerRadius: 2.5)
+                        HStack(spacing: 3) {
+                            // Compact color indicator
+                            RoundedRectangle(cornerRadius: 2)
                                 .fill(
                                     LinearGradient(
                                         gradient: Gradient(colors: [
@@ -383,40 +385,44 @@ struct SmallWidgetView: View {
                                         endPoint: .bottomTrailing
                                     )
                                 )
-                                .frame(width: 9, height: 9)
+                                .frame(width: 8, height: 8)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 2.5)
-                                        .stroke(category.color.darkColor.opacity(0.3), lineWidth: 0.7)
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .stroke(category.color.darkColor.opacity(0.25), lineWidth: 0.5)
                                 )
 
                             Text(category.name)
-                                .font(.system(size: 8.5, weight: .semibold))
+                                .font(.system(size: 8, weight: .semibold))
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineLimit(1)
 
                             Spacer(minLength: 0)
 
-                            HStack(spacing: 2) {
+                            HStack(spacing: 1.5) {
                                 Text("\(Int(category.hours))h")
-                                    .font(.system(size: 8.5, weight: .bold))
+                                    .font(.system(size: 8, weight: .bold))
                                     .foregroundColor(.white)
+
+                                Text("·")
+                                    .font(.system(size: 7, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.5))
 
                                 Text("\(Int(category.hours / 168.0 * 100))%")
                                     .font(.system(size: 7.5, weight: .medium))
-                                    .foregroundColor(.white.opacity(0.6))
+                                    .foregroundColor(.white.opacity(0.65))
                             }
                         }
-                        .padding(.vertical, 1)
+                        .padding(.vertical, 0.5)
                     }
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 5)
+                .padding(.horizontal, 7)
+                .padding(.vertical, 4)
                 .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.white.opacity(0.05))
+                    RoundedRectangle(cornerRadius: 5)
+                        .fill(Color.white.opacity(0.04))
                 )
-                .padding(.horizontal, 10)
-                .padding(.bottom, 8)
+                .padding(.horizontal, 8)
+                .padding(.bottom, 6)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
