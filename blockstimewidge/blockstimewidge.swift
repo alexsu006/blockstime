@@ -273,7 +273,7 @@ struct SmallWidgetView: View {
         var bestSpacing: CGFloat = 0.3
 
         // Reduce column count to make blocks bigger - start from 20 instead of 28
-        for cols in stride(from: 20, through: 10, by: -1) {
+        for cols in stride(from: 14, through: 10, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
             let spacing: CGFloat = 0.3  // Tighter spacing for more compact layout
 
@@ -287,7 +287,7 @@ struct SmallWidgetView: View {
             let totalHeightNeeded = CGFloat(rows) * blockSize + CGFloat(rows - 1) * spacing
 
             // Increase minimum block size to make blocks more visible
-            if blockSize >= 6 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
+            if blockSize >= 5 && totalWidthNeeded <= availableWidth && totalHeightNeeded <= availableHeight {
                 bestColumns = cols
                 bestRows = rows
                 bestBlockSize = blockSize
