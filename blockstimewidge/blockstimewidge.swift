@@ -377,7 +377,7 @@ struct MediumWidgetView: View {
         var bestSpacing: CGFloat = 0.8
 
         // Try different column counts to find optimal layout - maximize block space
-        for cols in stride(from: 32, through: 14, by: -1) {
+        for cols in stride(from: 16, through: 14, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
             let spacing: CGFloat = 0.8  // Compact spacing
 
@@ -526,7 +526,7 @@ struct LargeWidgetView: View {
 
         // Try different column counts to find optimal layout - maximize blocks
         // Start from 24 instead of 28 to make blocks bigger
-        for cols in stride(from: 24, through: 14, by: -1) {
+        for cols in stride(from: 30, through: 14, by: -1) {
             let rows = Int(ceil(Double(totalBlocks) / Double(cols)))
             let spacing: CGFloat = 1.0  // Tighter spacing for more block space
 
