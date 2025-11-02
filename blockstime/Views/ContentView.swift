@@ -13,8 +13,6 @@ import WidgetKit
 struct ContentView: View {
     @StateObject private var viewModel = CategoryViewModel()
     @State private var selectedTab = 0
-    @State private var showingRefreshAnimation = false
-    @State private var showingDiagnostics = false
 
     var body: some View {
         ZStack {
@@ -33,12 +31,7 @@ struct ContentView: View {
                 // Header
                 header
                     .padding(.top, 20)
-                    .padding(.bottom, 10)
-
-                // Tab indicator
-                tabIndicator
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 10)
+                    .padding(.bottom, 20)
 
                 // Main content with swipe
                 GeometryReader { geometry in
@@ -53,20 +46,17 @@ struct ContentView: View {
                             rightPanel
                         }
                         .padding(.horizontal, 20)
-                        .padding(.bottom, 20)
                     } else {
                         // iPhone portrait layout - swipeable tabs
                         TabView(selection: $selectedTab) {
-                            // Settings page
+                            // Categories page
                             CategoryListView(viewModel: viewModel)
                                 .padding(.horizontal, 20)
-                                .padding(.bottom, 20)
                                 .tag(0)
 
                             // Visualization page
                             rightPanel
                                 .padding(.horizontal, 20)
-                                .padding(.bottom, 20)
                                 .tag(1)
                         }
                         #if os(iOS)
@@ -74,6 +64,11 @@ struct ContentView: View {
                         #endif
                     }
                 }
+
+                // Tab indicator at bottom
+                tabIndicator
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
             }
         }
         .preferredColorScheme(.dark)
@@ -83,49 +78,95 @@ struct ContentView: View {
         GeometryReader { geometry in
             if geometry.size.width <= 768 {
                 HStack(spacing: 12) {
-                    tabButton(title: "⚙️ 設定", index: 0)
-                    tabButton(title: "📊 視覺化", index: 1)
+                    liquidGlassTabButton(title: "📦 類別", index: 0)
+                    liquidGlassTabButton(title: "📊 視覺化", index: 1)
                 }
-                .frame(maxWidth: .infinity)
+                .padding(6)
+                .background(
+                    // Liquid glass container background
+                    ZStack {
+                        // Dark background with blur
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.black.opacity(0.3))
+                            .background(.ultraThinMaterial)
+
+                        // Subtle border glow
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.white.opacity(0.3),
+                                        Color.white.opacity(0.1)
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                    }
+                )
+                .cornerRadius(16)
+                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
             }
         }
-        .frame(height: 44)
+        .frame(height: 60)
     }
 
-    private func tabButton(title: String, index: Int) -> some View {
+    private func liquidGlassTabButton(title: String, index: Int) -> some View {
         Button(action: {
             HapticManager.shared.tabSwitch()
-            withAnimation(.spring(response: Constants.springResponse,
-                                dampingFraction: Constants.springDampingFraction,
-                                blendDuration: Constants.springBlendDuration)) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                 selectedTab = index
             }
         }) {
             Text(title)
-                .font(.system(size: 15, weight: selectedTab == index ? .bold : .regular))
-                .foregroundColor(selectedTab == index ? .white : .gray)
+                .font(.system(size: 16, weight: selectedTab == index ? .semibold : .medium))
+                .foregroundColor(selectedTab == index ? .white : Color.white.opacity(0.6))
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
+                .padding(.vertical, 12)
                 .background(
-                    selectedTab == index ?
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color(hex: "#333333"),
-                                Color(hex: "#222222")
-                            ]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ) :
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color(hex: "#1a1a1a"),
-                                Color(hex: "#1a1a1a")
-                            ]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+                    ZStack {
+                        if selectedTab == index {
+                            // Active state - glowing glass effect
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            Color.white.opacity(0.25),
+                                            Color.white.opacity(0.15)
+                                        ]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .background(.ultraThinMaterial)
+
+                            // Glass shine effect
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            Color.white.opacity(0.5),
+                                            Color.white.opacity(0.2)
+                                        ]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1.5
+                                )
+
+                            // Soft glow
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.1))
+                                .blur(radius: 8)
+                        } else {
+                            // Inactive state - transparent
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.clear)
+                        }
+                    }
                 )
-                .cornerRadius(8)
+                .cornerRadius(12)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -134,7 +175,7 @@ struct ContentView: View {
         HStack(spacing: 8) {
             Text("🧱")
                 .font(.system(size: 32))
-            Text("Lego 時間規劃器")
+            Text("Blocks Time")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(
                     LinearGradient(
@@ -149,75 +190,8 @@ struct ContentView: View {
                 )
 
             Spacer()
-
-            // Diagnostics button
-            Button(action: {
-                HapticManager.shared.buttonTap()
-                showingDiagnostics.toggle()
-            }) {
-                Image(systemName: "stethoscope")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
-                    .padding(8)
-                    .background(
-                        Circle()
-                            .fill(Color(hex: "#333333"))
-                    )
-            }
-            .springyButton(scale: 0.9)
-            .help("Widget 診斷")
-            .popover(isPresented: $showingDiagnostics) {
-                DiagnosticsView()
-                    .frame(width: 600, height: 500)
-            }
-
-            // Manual widget refresh button
-            Button(action: {
-                HapticManager.shared.buttonTap()
-                refreshWidget()
-            }) {
-                Image(systemName: "arrow.clockwise")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
-                    .padding(8)
-                    .background(
-                        Circle()
-                            .fill(Color(hex: "#333333"))
-                    )
-                    .rotationEffect(.degrees(showingRefreshAnimation ? 360 : 0))
-            }
-            .springyButton(scale: 0.9)
-            .help("手動刷新 Widget")
         }
         .padding(.horizontal, 20)
-    }
-
-    private func refreshWidget() {
-        print("🔄 手動刷新 Widget...")
-
-        // Trigger rotation animation with smooth spring
-        withAnimation(.spring(response: Constants.smoothSpringResponse,
-                            dampingFraction: 0.8)) {
-            showingRefreshAnimation = true
-        }
-
-        // Force save current categories
-        viewModel.saveCategories()
-
-        #if canImport(WidgetKit)
-        if #available(iOS 14.0, macOS 11.0, *) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                WidgetCenter.shared.reloadAllTimelines()
-                print("✅ Widget 刷新請求已發送")
-
-                // Reset animation after a delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    showingRefreshAnimation = false
-                    HapticManager.shared.refreshCompleted()
-                }
-            }
-        }
-        #endif
     }
 
     private var rightPanel: some View {
