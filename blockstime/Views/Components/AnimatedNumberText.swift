@@ -51,18 +51,18 @@ struct AnimatedNumberText_Previews: PreviewProvider {
             VStack(spacing: 20) {
                 AnimatedNumberText(
                     value: value,
-                    format: "%.1f",
+                    format: "%.0f",
                     font: .system(size: 48, weight: .bold),
                     foregroundColor: .white
                 )
 
                 Button("增加") {
-                    value += 10.5
+                    value += 10
                 }
                 .buttonStyle(.borderedProminent)
 
                 Button("減少") {
-                    value = max(0, value - 10.5)
+                    value = max(0, value - 10)
                 }
                 .buttonStyle(.bordered)
             }

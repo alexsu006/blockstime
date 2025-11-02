@@ -31,7 +31,7 @@ enum Constants {
     static let defaultLayoutColumns: Int = 4
 
     // Precision Constants
-    static let hoursPrecision: Double = 10.0 // 用於四捨五入到小數點後一位
+    static let hoursPrecision: Double = 1.0 // 用於四捨五入到整數
     static let sliderSyncThreshold: Double = 0.01 // Slider 同步閾值
 
     // Animation Constants
