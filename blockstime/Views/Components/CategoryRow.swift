@@ -15,6 +15,7 @@ struct CategoryRow: View {
     let onColorTap: () -> Void
     let onRemove: () -> Void
     let colorAnimation: Namespace.ID?
+    var focusedField: FocusState<Bool>.Binding?
 
     @State private var sliderValue: Double
     @State private var lastHapticValue: Double = 0
@@ -25,7 +26,8 @@ struct CategoryRow: View {
          onHoursChange: @escaping (Double) -> Void,
          onColorTap: @escaping () -> Void,
          onRemove: @escaping () -> Void,
-         colorAnimation: Namespace.ID? = nil) {
+         colorAnimation: Namespace.ID? = nil,
+         focusedField: FocusState<Bool>.Binding? = nil) {
         self.category = category
         self.maxAvailableHours = maxAvailableHours
         self.onNameChange = onNameChange
@@ -33,6 +35,7 @@ struct CategoryRow: View {
         self.onColorTap = onColorTap
         self.onRemove = onRemove
         self.colorAnimation = colorAnimation
+        self.focusedField = focusedField
         _sliderValue = State(initialValue: category.hours)
     }
 
@@ -81,6 +84,9 @@ struct CategoryRow: View {
                 .font(.system(size: 14, weight: .semibold))
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .frame(height: 28)
+                .if(focusedField != nil) { view in
+                    view.focused(focusedField!)
+                }
 
                 // Remove button
                 Button(action: {

@@ -175,7 +175,7 @@ struct ContentView: View {
         HStack(spacing: 8) {
             Text("🧱")
                 .font(.system(size: 32))
-            Text("Blocks Time")
+            Text("blocks time")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(
                     LinearGradient(

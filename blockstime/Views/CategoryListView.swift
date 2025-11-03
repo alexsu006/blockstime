@@ -50,7 +50,8 @@ struct CategoryListView: View {
                                     viewModel.removeCategory(category)
                                 }
                             },
-                            colorAnimation: colorAnimation
+                            colorAnimation: colorAnimation,
+                            focusedField: $focusedField
                         )
                         .transition(.asymmetric(
                             insertion: .move(edge: .leading).combined(with: .opacity),
