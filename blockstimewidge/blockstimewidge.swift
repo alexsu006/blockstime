@@ -392,8 +392,31 @@ struct MediumWidgetView: View {
         return max(total, 1.0) // Prevent division by zero
     }
 
+    // Estimate legend height based on category count
+    private func estimateLegendHeight(width: CGFloat, categoryCount: Int) -> CGFloat {
+        guard categoryCount > 0 else { return 18 }
+
+        // Estimate: Each legend item is approximately 60-80 pixels wide
+        // Legend has 6pt horizontal padding on each side = 12pt total
+        let availableWidth = width - 12
+        let estimatedItemWidth: CGFloat = 70  // Average width per item
+        let itemsPerRow = max(1, Int(availableWidth / estimatedItemWidth))
+        let numberOfRows = max(1, Int(ceil(Double(categoryCount) / Double(itemsPerRow))))
+
+        // Each row: 7pt (color box) + 2pt padding = ~13pt height per row
+        // Add padding: 2pt top + 2pt bottom + spacing between rows
+        let baseRowHeight: CGFloat = 13
+        let verticalPadding: CGFloat = 4
+        let rowSpacing: CGFloat = 2
+
+        let totalHeight = verticalPadding + CGFloat(numberOfRows) * baseRowHeight + CGFloat(max(0, numberOfRows - 1)) * rowSpacing
+
+        // Clamp between 18pt (min, single row) and 50pt (max, ~3 rows)
+        return min(max(totalHeight, 18), 50)
+    }
+
     // Calculate optimal layout for medium widget - 24 blocks per row, 7 rows with dynamic legend at bottom
-    private func calculateLayout(width: CGFloat, height: CGFloat, legendHeight: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
+    private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
         let totalBlocks = allBlocks.count
         guard totalBlocks > 0 else {
             return (24, 7, 6, 1)
@@ -404,7 +427,8 @@ struct MediumWidgetView: View {
         let rows = 7
         let spacing: CGFloat = 0.8
 
-        // Use actual legend height from view measurement
+        // Dynamic legend height based on number of categories
+        let legendHeight = estimateLegendHeight(width: width, categoryCount: visibleCategories.count)
         let padding: CGFloat = 4
         let sectionSpacing: CGFloat = 2
 
@@ -422,106 +446,71 @@ struct MediumWidgetView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            // Measure legend to get its actual height
-            VStack(spacing: 0) {
-                Color.clear
-                    .overlay(
-                        // Hidden legend to measure height
-                        FlowLayout(spacing: 4) {
-                            ForEach(visibleCategories, id: \.id) { category in
-                                HStack(spacing: 2) {
-                                    RoundedRectangle(cornerRadius: 1.5)
-                                        .frame(width: 7, height: 7)
-                                    Text("\(category.name) \(Int(category.hours))h")
-                                        .font(.system(size: 7, weight: .semibold))
-                                        .lineLimit(1)
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 1)  // Minimal vertical padding
-                        .background(GeometryReader { legendGeometry in
-                            Color.clear.preference(key: LegendHeightKey.self, value: legendGeometry.size.height)
-                        })
-                    )
-                    .frame(height: 0)
-                    .hidden()
-            }
-            .backgroundPreferenceValue(LegendHeightKey.self) { legendHeight in
-                let layout = calculateLayout(width: geometry.size.width, height: geometry.size.height, legendHeight: legendHeight)
-                let columns = layout.columns
-                let blockSize = layout.blockSize
-                let spacing = layout.spacing
+            let layout = calculateLayout(width: geometry.size.width, height: geometry.size.height)
+            let columns = layout.columns
+            let blockSize = layout.blockSize
+            let spacing = layout.spacing
 
-                VStack(spacing: 1) {  // Reduced spacing between blocks and legend
-                    // Blocks Grid - fills most of the space
-                    LazyVGrid(
-                        columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
-                        alignment: .center,
-                        spacing: spacing
-                    ) {
-                        ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
-                            WidgetLegoBlock(
-                                number: nil,
-                                color: block.category.color,
-                                size: blockSize,
-                                showNumber: false
-                            )
-                        }
+            return VStack(spacing: 2) {
+                // Blocks Grid - fills most of the space, no spacers
+                LazyVGrid(
+                    columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
+                    alignment: .center,
+                    spacing: spacing
+                ) {
+                    ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
+                        WidgetLegoBlock(
+                            number: nil,
+                            color: block.category.color,
+                            size: blockSize,
+                            showNumber: false
+                        )
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
-
-                    // Bottom Legend - Multi-line flow layout (shows ALL categories)
-                    FlowLayout(spacing: 4) {
-                        ForEach(visibleCategories, id: \.id) { category in
-                            HStack(spacing: 2) {
-                                // Compact color indicator
-                                RoundedRectangle(cornerRadius: 1.5)
-                                    .fill(
-                                        LinearGradient(
-                                            gradient: Gradient(colors: [
-                                                category.color.lightColor,
-                                                category.color.mainColor,
-                                                category.color.darkColor
-                                            ]),
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                                    .frame(width: 7, height: 7)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 1.5)
-                                            .stroke(category.color.darkColor.opacity(0.3), lineWidth: 0.5)
-                                    )
-
-                                // Compact single line text
-                                Text("\(category.name) \(Int(category.hours))h")
-                                    .font(.system(size: 7, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 1)  // Minimal vertical padding
-                    .background(
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.white.opacity(0.05))
-                    )
-                    .padding(.horizontal, 4)
                 }
-                .padding(4)
-            }
-        }
-    }
-}
+                .frame(maxWidth: .infinity, alignment: .center)
 
-// Preference key for legend height
-private struct LegendHeightKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
+                // Bottom Legend - Multi-line flow layout (shows ALL categories)
+                FlowLayout(spacing: 4) {
+                    ForEach(visibleCategories, id: \.id) { category in
+                        HStack(spacing: 2) {
+                            // Compact color indicator
+                            RoundedRectangle(cornerRadius: 1.5)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            category.color.lightColor,
+                                            category.color.mainColor,
+                                            category.color.darkColor
+                                        ]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 7, height: 7)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 1.5)
+                                        .stroke(category.color.darkColor.opacity(0.3), lineWidth: 0.5)
+                                )
+
+                            // Compact single line text
+                            Text("\(category.name) \(Int(category.hours))h")
+                                .font(.system(size: 7, weight: .semibold))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                        }
+                    }
+                }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.05))
+                )
+                .padding(.horizontal, 4)
+            }
+            .padding(4)
+        }
     }
 }
 
@@ -551,8 +540,31 @@ struct LargeWidgetView: View {
         return max(total, 1.0) // Prevent division by zero
     }
 
+    // Estimate legend height based on category count
+    private func estimateLegendHeight(width: CGFloat, categoryCount: Int) -> CGFloat {
+        guard categoryCount > 0 else { return 26 }
+
+        // Estimate: Each legend item is approximately 80-100 pixels wide (larger than medium)
+        // Legend has 8pt horizontal padding on each side = 16pt total
+        let availableWidth = width - 16
+        let estimatedItemWidth: CGFloat = 90  // Average width per item (larger font, larger color box)
+        let itemsPerRow = max(1, Int(availableWidth / estimatedItemWidth))
+        let numberOfRows = max(1, Int(ceil(Double(categoryCount) / Double(itemsPerRow))))
+
+        // Each row: 12pt (color box) + 4pt padding = ~18pt height per row
+        // Add padding: 4pt top + 4pt bottom + spacing between rows
+        let baseRowHeight: CGFloat = 18
+        let verticalPadding: CGFloat = 8
+        let rowSpacing: CGFloat = 3
+
+        let totalHeight = verticalPadding + CGFloat(numberOfRows) * baseRowHeight + CGFloat(max(0, numberOfRows - 1)) * rowSpacing
+
+        // Clamp between 26pt (min, single row) and 70pt (max, ~3 rows)
+        return min(max(totalHeight, 26), 70)
+    }
+
     // Calculate optimal layout for large widget - 12 blocks per row, 14 rows with dynamic legend
-    private func calculateLayout(width: CGFloat, height: CGFloat, legendHeight: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
+    private func calculateLayout(width: CGFloat, height: CGFloat) -> (columns: Int, rows: Int, blockSize: CGFloat, spacing: CGFloat) {
         let totalBlocks = allBlocks.count
         guard totalBlocks > 0 else {
             return (12, 14, 15, 2)
@@ -563,7 +575,8 @@ struct LargeWidgetView: View {
         let rows = 14
         let spacing: CGFloat = 1.0
 
-        // Use actual legend height from view measurement
+        // Dynamic legend height based on number of categories
+        let legendHeight = estimateLegendHeight(width: width, categoryCount: visibleCategories.count)
         let padding: CGFloat = 4
         let sectionSpacing: CGFloat = 2
 
@@ -581,106 +594,71 @@ struct LargeWidgetView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            // Measure legend to get its actual height
-            VStack(spacing: 0) {
-                Color.clear
-                    .overlay(
-                        // Hidden legend to measure height
-                        FlowLayout(spacing: 8) {
-                            ForEach(visibleCategories, id: \.id) { category in
-                                HStack(spacing: 3) {
-                                    RoundedRectangle(cornerRadius: 2)
-                                        .frame(width: 12, height: 12)
-                                    Text("\(category.name) \(Int(category.hours))h")
-                                        .font(.system(size: 9, weight: .bold))
-                                        .lineLimit(1)
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)  // Minimal vertical padding
-                        .background(GeometryReader { legendGeometry in
-                            Color.clear.preference(key: LargeLegendHeightKey.self, value: legendGeometry.size.height)
-                        })
-                    )
-                    .frame(height: 0)
-                    .hidden()
-            }
-            .backgroundPreferenceValue(LargeLegendHeightKey.self) { legendHeight in
-                let layout = calculateLayout(width: geometry.size.width, height: geometry.size.height, legendHeight: legendHeight)
-                let columns = layout.columns
-                let blockSize = layout.blockSize
-                let spacing = layout.spacing
+            let layout = calculateLayout(width: geometry.size.width, height: geometry.size.height)
+            let columns = layout.columns
+            let blockSize = layout.blockSize
+            let spacing = layout.spacing
 
-                VStack(spacing: 1) {  // Reduced spacing between blocks and legend
-                    // Blocks Grid - fills most of the space
-                    LazyVGrid(
-                        columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
-                        alignment: .center,
-                        spacing: spacing
-                    ) {
-                        ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
-                            WidgetLegoBlock(
-                                number: nil,
-                                color: block.category.color,
-                                size: blockSize,
-                                showNumber: false
-                            )
-                        }
+            return VStack(spacing: 2) {
+                // Blocks Grid - fills most of the space, no spacers
+                LazyVGrid(
+                    columns: Array(repeating: GridItem(.fixed(blockSize), spacing: spacing), count: columns),
+                    alignment: .center,
+                    spacing: spacing
+                ) {
+                    ForEach(Array(allBlocks.enumerated()), id: \.offset) { _, block in
+                        WidgetLegoBlock(
+                            number: nil,
+                            color: block.category.color,
+                            size: blockSize,
+                            showNumber: false
+                        )
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
-
-                    // Bottom Legend - Multi-line flow layout with ALL categories
-                    FlowLayout(spacing: 8) {
-                        ForEach(visibleCategories, id: \.id) { category in
-                            HStack(spacing: 3) {
-                                // Larger color indicator block
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(
-                                        LinearGradient(
-                                            gradient: Gradient(colors: [
-                                                category.color.lightColor,
-                                                category.color.mainColor,
-                                                category.color.darkColor
-                                            ]),
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                                    .frame(width: 12, height: 12)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 2)
-                                            .stroke(category.color.darkColor.opacity(0.4), lineWidth: 0.8)
-                                    )
-
-                                // Category name and hours
-                                Text("\(category.name) \(Int(category.hours))h")
-                                    .font(.system(size: 9, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)  // Minimal vertical padding
-                    .background(
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.white.opacity(0.05))
-                    )
-                    .padding(.horizontal, 4)
                 }
-                .padding(4)
-            }
-        }
-    }
-}
+                .frame(maxWidth: .infinity, alignment: .center)
 
-// Preference key for large legend height
-private struct LargeLegendHeightKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
+                // Bottom Legend - Multi-line flow layout with ALL categories
+                FlowLayout(spacing: 8) {
+                    ForEach(visibleCategories, id: \.id) { category in
+                        HStack(spacing: 3) {
+                            // Larger color indicator block
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            category.color.lightColor,
+                                            category.color.mainColor,
+                                            category.color.darkColor
+                                        ]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 12, height: 12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .stroke(category.color.darkColor.opacity(0.4), lineWidth: 0.8)
+                                )
+
+                            // Category name and hours
+                            Text("\(category.name) \(Int(category.hours))h")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                        }
+                    }
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.05))
+                )
+                .padding(.horizontal, 4)
+            }
+            .padding(4)
+        }
     }
 }
 
